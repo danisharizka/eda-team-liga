@@ -166,7 +166,15 @@ body {
 }
 
 .card-icon {
-  font-size: 24px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--accent-green);
+  background: rgba(0, 255, 136, 0.1);
+  padding: 6px 12px;
+  border-radius: 6px;
+  border: 1px solid rgba(0, 255, 136, 0.2);
 }
 
 .card-title {
@@ -212,9 +220,27 @@ select, button {
   outline: none;
 }
 
+select {
+  background: rgba(20, 30, 50, 0.8);
+  color: #ffffff;
+  appearance: none;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 16px;
+  padding-right: 40px;
+}
+
+select option {
+  background: #1a2332;
+  color: #ffffff;
+  padding: 10px;
+}
+
 select:hover, select:focus {
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(30, 40, 60, 0.9);
   border-color: var(--accent-green);
+  box-shadow: 0 0 0 2px rgba(0, 255, 136, 0.1);
 }
 
 button {
@@ -342,7 +368,7 @@ button:active {
 
 .plot {
   width: 100%;
-  min-height: 450px;
+  min-height: 500px;
 }
 
 /* Interpretation Box */
@@ -476,7 +502,7 @@ button:active {
   
   <!-- Header -->
   <header class="dashboard-header">
-    <div class="header-badge">⚽ Live Analytics</div>
+    <div class="header-badge">Live Analytics</div>
     <h1 class="dashboard-title">Football Performance Analytics</h1>
     <p class="dashboard-subtitle">
       Analisis mendalam tentang performa pemain dan korelasi dengan nilai pasar. 
@@ -487,7 +513,7 @@ button:active {
   <!-- Controls Card -->
   <div class="glass-card">
     <div class="card-header">
-      <span class="card-icon">🎛️</span>
+      <span class="card-icon">Control Panel</span>
       <h2 class="card-title">Control Panel</h2>
     </div>
     
@@ -526,7 +552,7 @@ button:active {
   <!-- KPI Card -->
   <div class="glass-card">
     <div class="card-header">
-      <span class="card-icon">📈</span>
+      <span class="card-icon">KPI Metrics</span>
       <h2 class="card-title">Key Performance Indicators</h2>
     </div>
     <div id="kpiArea" class="kpi-grid"></div>
@@ -535,7 +561,7 @@ button:active {
   <!-- Distribution Chart -->
   <div class="glass-card">
     <div class="card-header">
-      <span class="card-icon">🥧</span>
+      <span class="card-icon">Distribution</span>
       <h2 class="card-title">Distribusi Pemain per Liga</h2>
     </div>
     <div class="chart-container">
@@ -549,7 +575,7 @@ button:active {
     <!-- Scatter Plot -->
     <div class="glass-card">
       <div class="card-header">
-        <span class="card-icon">📊</span>
+        <span class="card-icon">Scatter</span>
         <h2 class="card-title">Scatter Plot</h2>
       </div>
       <div class="chart-container">
@@ -561,7 +587,7 @@ button:active {
     <!-- Bar Chart -->
     <div class="glass-card">
       <div class="card-header">
-        <span class="card-icon">🏆</span>
+        <span class="card-icon">Top 10</span>
         <h2 class="card-title">Top 10 Market Value</h2>
       </div>
       <div class="chart-container">
@@ -573,7 +599,7 @@ button:active {
     <!-- Box Plot -->
     <div class="glass-card">
       <div class="card-header">
-        <span class="card-icon">📦</span>
+        <span class="card-icon">Box Plot</span>
         <h2 class="card-title">Distribusi Box Plot</h2>
       </div>
       <div class="chart-container">
@@ -586,7 +612,7 @@ button:active {
   <!-- Heatmap -->
   <div class="glass-card">
     <div class="card-header">
-      <span class="card-icon">🔥</span>
+      <span class="card-icon">Heatmap</span>
       <h2 class="card-title">Correlation Heatmap</h2>
     </div>
     <div class="chart-container">
@@ -598,7 +624,7 @@ button:active {
   <!-- Analysis -->
   <div class="glass-card">
     <div class="card-header">
-      <span class="card-icon">💡</span>
+      <span class="card-icon">Analysis</span>
       <h2 class="card-title">Analisis & Insight</h2>
     </div>
     <div id="analysisText" class="interpretation"></div>
@@ -701,7 +727,7 @@ function init() {
     .catch(error => {
       document.querySelector('.container').innerHTML = `
         <div class="glass-card" style="text-align: center; padding: 60px;">
-          <h2 style="color: var(--accent-orange); margin-bottom: 20px;">⚠️ Error Loading Data</h2>
+          <h2 style="color: var(--accent-orange); margin-bottom: 20px;">WARNING: Error Loading Data</h2>
           <p style="color: var(--text-secondary); max-width: 600px; margin: 0 auto; line-height: 1.8;">
             ${error.message}
           </p>
@@ -831,12 +857,21 @@ function renderPie(filtered) {
   }];
   
   const layout = {
-    height: 450,
+    height: 520,
     paper_bgcolor: 'rgba(0,0,0,0)',
     plot_bgcolor: 'rgba(0,0,0,0)',
     font: { color: '#ffffff', family: 'DM Sans' },
     showlegend: true,
-    legend: { orientation: 'h', y: -0.1 }
+    legend: { 
+      orientation: 'v',
+      x: 1.02,
+      y: 1,
+      xanchor: 'left',
+      yanchor: 'top',
+      bgcolor: 'rgba(0,0,0,0)',
+      font: { size: 11 }
+    },
+    margin: { l: 20, r: 180, t: 20, b: 20 }
   };
   
   Plotly.newPlot('pie', data, layout, { responsive: true });
@@ -877,7 +912,7 @@ function renderBar(filtered) {
   };
   
   const layout = {
-    height: 450,
+    height: 520,
     paper_bgcolor: 'rgba(0,0,0,0)',
     plot_bgcolor: 'rgba(0,0,0,0)',
     font: { color: '#ffffff', family: 'DM Sans' },
@@ -898,7 +933,7 @@ function renderScatter(filtered) {
   
   if (x === y) {
     sameVarDisclaimer.style.display = 'block';
-    sameVarDisclaimer.innerText = `⚠️ Variabel X dan Y sama (${x}). Scatter plot akan menampilkan garis diagonal.`;
+    sameVarDisclaimer.innerText = `WARNING: Variabel X dan Y sama (${x}). Scatter plot akan menampilkan garis diagonal.`;
   } else {
     sameVarDisclaimer.style.display = 'none';
   }
@@ -941,14 +976,23 @@ function renderScatter(filtered) {
   });
   
   const layout = {
-    height: 450,
+    height: 520,
     paper_bgcolor: 'rgba(0,0,0,0)',
     plot_bgcolor: 'rgba(0,0,0,0)',
     font: { color: '#ffffff', family: 'DM Sans' },
     xaxis: { title: x, color: '#a0aec0', gridcolor: 'rgba(255,255,255,0.1)' },
     yaxis: { title: y, color: '#a0aec0', gridcolor: 'rgba(255,255,255,0.1)' },
     showlegend: true,
-    legend: { orientation: 'h', y: -0.15 }
+    legend: { 
+      orientation: 'v', 
+      x: 1.02, 
+      y: 1,
+      xanchor: 'left',
+      yanchor: 'top',
+      bgcolor: 'rgba(0,0,0,0)',
+      font: { size: 11 }
+    },
+    margin: { l: 60, r: 150, t: 40, b: 60 }
   };
   
   Plotly.newPlot('scatter', traces, layout, { responsive: true });
@@ -1009,7 +1053,7 @@ function renderBox(filtered) {
   };
   
   const layout = {
-    height: 450,
+    height: 520,
     paper_bgcolor: 'rgba(0,0,0,0)',
     plot_bgcolor: 'rgba(0,0,0,0)',
     font: { color: '#ffffff', family: 'DM Sans' },
@@ -1114,7 +1158,7 @@ function renderAnalysis(filtered) {
   let text = '';
   
   if (x === y) {
-    text = `⚠️ Anda memilih variabel yang sama (${x}) untuk sumbu X dan Y. Ini akan menghasilkan garis diagonal sempurna pada scatter plot karena setiap titik memiliki nilai yang identik untuk kedua sumbu. Untuk analisis yang bermakna, pilih dua variabel berbeda.`;
+    text = `WARNING: Anda memilih variabel yang sama (${x}) untuk sumbu X dan Y. Ini akan menghasilkan garis diagonal sempurna pada scatter plot karena setiap titik memiliki nilai yang identik untuk kedua sumbu. Untuk analisis yang bermakna, pilih dua variabel berbeda.`;
   } else if (NUMERIC_COLS.includes(x) && NUMERIC_COLS.includes(y)) {
     const xs = [], ys = [];
     
