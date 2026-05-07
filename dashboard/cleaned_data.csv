@@ -24,7 +24,7 @@ Italy,Serie A,(SAS),domenico berardi,29,2,2654,14,10.9,0.39,120,46,4.3,1.65,2019
 Italy,Serie A,(CAG),joao pedro,35,1,3394,18,13.93,0.39,87,37,2.44,1.04,2019,14000000
 Italy,Serie A,(CAG),joao pedro,35,1,3394,18,13.93,0.39,87,37,2.44,1.04,2019,12000000
 Italy,Serie A,(ATA),josip ilicic,21,5,1786,15,9.78,0.52,81,36,4.31,1.91,2019,15000000
-Italy,Serie A,,andreas cornelius,17,9,1637,12,6.38,0.37,46,20,2.67,1.16,2019,8000000
+Italy,Serie A,(PAR),andreas cornelius,17,9,1637,12,6.38,0.37,46,20,2.67,1.16,2019,8000000
 Italy,Serie A,(CAG),giovanni simeone,34,3,3115,12,11.8,0.36,87,30,2.65,0.91,2019,13000000
 Italy,Serie A,(LAZ),ciro immobile,36,1,3371,36,26.61,0.75,142,71,4.0,2.0,2019,40000000
 Italy,Serie A,(LEC),marco mancosu,28,5,2627,14,15.21,0.55,84,31,3.04,1.12,2019,2000000
@@ -152,7 +152,7 @@ England,Premier League,(WHU),jarrod bowen,10,0,845,4,2.94,0.33,22,5,2.47,0.56,20
 England,Premier League,(LIV),mohamed salah,9,0,831,8,6.12,0.7,35,15,4.0,1.71,2020,120000000
 England,Premier League,(LEI),jamie vardy,8,1,780,8,8.7,1.06,21,15,2.56,1.83,2020,16000000
 England,Premier League,(TOT),harry kane,10,0,956,7,6.64,0.66,39,15,3.88,1.49,2020,120000000
-England,Premier League,,danny ings,7,0,662,5,2.58,0.37,15,9,2.15,1.29,2020,17000000
+England,Premier League,(SOU),danny ings,7,0,662,5,2.58,0.37,15,9,2.15,1.29,2020,17000000
 England,Premier League,(BHA),neal maupay,9,0,786,4,6.54,0.79,25,11,3.02,1.33,2020,17000000
 England,Premier League,(MNC),riyad mahrez,7,0,612,4,1.93,0.3,21,10,3.26,1.55,2020,48000000
 Brazil,Campeonato Brasileiro SÃ©rie A,(FLA),pedro,12,6,1207,10,10.42,0.82,46,25,3.62,1.97,2020,7500000

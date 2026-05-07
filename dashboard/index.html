@@ -1,128 +1,632 @@
-
-<!doctype html>
+<!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Football Player Performance Dashboard</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Football Analytics Dashboard</title>
 <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#f7f9fc;--card:#fff;--accent:#0d6efd;--muted:#6c757d}
-body{font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,Arial;background:var(--bg);margin:18px;color:#111}
-.container{max-width:1200px;margin:0 auto}
-header{text-align:center;margin-bottom:12px}
-h1{margin:6px 0;color:var(--accent)}
-.card{background:var(--card);border-radius:10px;padding:12px;box-shadow:0 6px 20px rgba(20,30,50,0.06);margin-bottom:12px}
-.controls{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
-select,button{padding:8px 10px;border-radius:8px;border:1px solid #e6eef8;background:white;font-size:0.95rem}
-.kpi-table{width:100%;border-collapse:collapse;margin-top:8px}
-.kpi-table th,.kpi-table td{padding:8px 10px;border-bottom:1px solid #f0f3f8;text-align:center}
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.plot{width:100%;height:480px}
-.small-note{color:var(--muted);font-size:0.95rem;margin-top:6px}
-.interp{white-space:pre-wrap;background:#f0f8ff;padding:12px;border-radius:8px;border:1px solid #e6f2ff;margin-top:8px}
-@media(max-width:1000px){.grid{grid-template-columns:1fr}.plot{height:420px}}
+:root {
+  --bg-primary: #0a0e1a;
+  --bg-secondary: #141824;
+  --bg-card: rgba(255, 255, 255, 0.03);
+  --accent-green: #00ff88;
+  --accent-blue: #00d4ff;
+  --accent-purple: #b400ff;
+  --accent-orange: #ff6b00;
+  --text-primary: #ffffff;
+  --text-secondary: #a0aec0;
+  --border-subtle: rgba(255, 255, 255, 0.08);
+  --glass-bg: rgba(20, 24, 36, 0.7);
+  --shadow-glow: rgba(0, 255, 136, 0.15);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+/* Animated Background */
+.bg-animation {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  opacity: 0.4;
+}
+
+.bg-gradient {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(120px);
+  animation: float 20s infinite ease-in-out;
+}
+
+.bg-gradient:nth-child(1) {
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(circle, var(--accent-green) 0%, transparent 70%);
+  top: -200px;
+  left: -200px;
+  animation-delay: 0s;
+}
+
+.bg-gradient:nth-child(2) {
+  width: 500px;
+  height: 500px;
+  background: radial-gradient(circle, var(--accent-blue) 0%, transparent 70%);
+  top: 50%;
+  right: -150px;
+  animation-delay: 5s;
+}
+
+.bg-gradient:nth-child(3) {
+  width: 450px;
+  height: 450px;
+  background: radial-gradient(circle, var(--accent-purple) 0%, transparent 70%);
+  bottom: -100px;
+  left: 30%;
+  animation-delay: 10s;
+}
+
+@keyframes float {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(100px, -100px) scale(1.1); }
+  66% { transform: translate(-50px, 100px) scale(0.9); }
+}
+
+/* Container */
+.container {
+  max-width: 1600px;
+  margin: 0 auto;
+  padding: 20px;
+  position: relative;
+  z-index: 1;
+}
+
+/* Header */
+.dashboard-header {
+  text-align: center;
+  margin-bottom: 40px;
+  padding: 60px 20px 40px;
+  animation: fadeInDown 0.8s ease-out;
+}
+
+.header-badge {
+  display: inline-block;
+  padding: 8px 20px;
+  background: linear-gradient(135deg, var(--accent-green), var(--accent-blue));
+  border-radius: 30px;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-bottom: 20px;
+  animation: pulse 2s infinite;
+}
+
+.dashboard-title {
+  font-family: 'Syne', sans-serif;
+  font-size: clamp(2.5rem, 6vw, 4.5rem);
+  font-weight: 800;
+  margin-bottom: 15px;
+  background: linear-gradient(135deg, var(--text-primary) 0%, var(--accent-green) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  line-height: 1.2;
+}
+
+.dashboard-subtitle {
+  font-size: 1.1rem;
+  color: var(--text-secondary);
+  max-width: 700px;
+  margin: 0 auto;
+  line-height: 1.7;
+}
+
+/* Glass Card */
+.glass-card {
+  background: var(--glass-bg);
+  backdrop-filter: blur(20px);
+  border: 1px solid var(--border-subtle);
+  border-radius: 24px;
+  padding: 30px;
+  margin-bottom: 24px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  transition: all 0.3s ease;
+  animation: fadeInUp 0.6s ease-out backwards;
+}
+
+.glass-card:hover {
+  border-color: rgba(0, 255, 136, 0.3);
+  box-shadow: 0 12px 48px var(--shadow-glow);
+  transform: translateY(-2px);
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.card-icon {
+  font-size: 24px;
+}
+
+.card-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+/* Controls */
+.controls-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.control-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.control-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--accent-green);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+select, button {
+  width: 100%;
+  padding: 14px 18px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+  color: var(--text-primary);
+  font-size: 0.95rem;
+  font-family: 'DM Sans', sans-serif;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  outline: none;
+}
+
+select:hover, select:focus {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: var(--accent-green);
+}
+
+button {
+  background: linear-gradient(135deg, var(--accent-green), var(--accent-blue));
+  font-weight: 700;
+  border: none;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  position: relative;
+  overflow: hidden;
+}
+
+button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+  transition: left 0.5s;
+}
+
+button:hover::before {
+  left: 100%;
+}
+
+button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 255, 136, 0.3);
+}
+
+button:active {
+  transform: translateY(0);
+}
+
+.btn-secondary {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-primary);
+}
+
+.btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.1);
+  box-shadow: 0 4px 16px rgba(255, 255, 255, 0.1);
+}
+
+/* Alert Box */
+.alert-box {
+  padding: 16px 20px;
+  background: rgba(255, 107, 0, 0.1);
+  border: 1px solid rgba(255, 107, 0, 0.3);
+  border-radius: 12px;
+  color: var(--accent-orange);
+  font-size: 0.9rem;
+  margin-top: 16px;
+  animation: slideIn 0.3s ease-out;
+}
+
+/* Executive Summary */
+.exec-summary {
+  background: linear-gradient(135deg, rgba(0, 255, 136, 0.1), rgba(0, 212, 255, 0.1));
+  border: 1px solid rgba(0, 255, 136, 0.2);
+  border-radius: 16px;
+  padding: 20px;
+  margin-top: 20px;
+}
+
+.exec-summary h3 {
+  font-family: 'Syne', sans-serif;
+  font-size: 1.2rem;
+  margin-bottom: 12px;
+  color: var(--accent-green);
+}
+
+.exec-text {
+  color: var(--text-secondary);
+  line-height: 1.8;
+}
+
+/* KPI Cards */
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-top: 20px;
+}
+
+.kpi-item {
+  background: rgba(0, 255, 136, 0.05);
+  border: 1px solid rgba(0, 255, 136, 0.15);
+  border-radius: 16px;
+  padding: 20px;
+  text-align: center;
+  transition: all 0.3s ease;
+}
+
+.kpi-item:hover {
+  background: rgba(0, 255, 136, 0.1);
+  border-color: var(--accent-green);
+  transform: translateY(-4px);
+}
+
+.kpi-label {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 8px;
+}
+
+.kpi-value {
+  font-family: 'Syne', sans-serif;
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--accent-green);
+}
+
+/* Chart Container */
+.chart-container {
+  margin-top: 24px;
+  border-radius: 16px;
+  overflow: hidden;
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.plot {
+  width: 100%;
+  min-height: 450px;
+}
+
+/* Interpretation Box */
+.interpretation {
+  margin-top: 20px;
+  padding: 20px;
+  background: rgba(0, 212, 255, 0.05);
+  border-left: 4px solid var(--accent-blue);
+  border-radius: 12px;
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+  line-height: 1.8;
+}
+
+/* Grid Layout */
+.charts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(600px, 1fr));
+  gap: 24px;
+  margin-top: 24px;
+}
+
+/* Footer */
+.dashboard-footer {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  margin-top: 60px;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.footer-highlight {
+  color: var(--accent-green);
+  font-weight: 700;
+}
+
+/* Animations */
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .dashboard-title {
+    font-size: 2rem;
+  }
+  
+  .charts-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .controls-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .plot {
+    min-height: 350px;
+  }
+}
+
+/* Loading State */
+.loading {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border: 3px solid rgba(0, 255, 136, 0.3);
+  border-top-color: var(--accent-green);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Stagger animations for cards */
+.glass-card:nth-child(1) { animation-delay: 0.1s; }
+.glass-card:nth-child(2) { animation-delay: 0.2s; }
+.glass-card:nth-child(3) { animation-delay: 0.3s; }
+.glass-card:nth-child(4) { animation-delay: 0.4s; }
+.glass-card:nth-child(5) { animation-delay: 0.5s; }
+.glass-card:nth-child(6) { animation-delay: 0.6s; }
 </style>
 </head>
 <body>
+
+<!-- Animated Background -->
+<div class="bg-animation">
+  <div class="bg-gradient"></div>
+  <div class="bg-gradient"></div>
+  <div class="bg-gradient"></div>
+</div>
+
+<!-- Main Container -->
 <div class="container">
-  <header>
-    <h1>⚽ Football Player Performance Dashboard</h1>
-    <div class="card">
-      <p style="margin:0;">
-        Dashboard interaktif ini membantu mengeksplorasi hubungan antara atribut performa pemain dan nilai pasar (market value). Pilih liga dan variabel untuk menyesuaikan analisis.
-      </p>
-    </div>
+  
+  <!-- Header -->
+  <header class="dashboard-header">
+    <div class="header-badge">⚽ Live Analytics</div>
+    <h1 class="dashboard-title">Football Performance Analytics</h1>
+    <p class="dashboard-subtitle">
+      Analisis mendalam tentang performa pemain dan korelasi dengan nilai pasar. 
+      Eksplorasi data interaktif dengan visualisasi real-time.
+    </p>
   </header>
 
-  <div class="card">
-    <div class="controls">
-      <label><strong>Filter Liga</strong></label>
-      <select id="leagueSelect"><option>Semua Liga</option></select>
-
-      <label><strong>Variabel X</strong></label>
-      <select id="xSelect"></select>
-
-      <label><strong>Variabel Y</strong></label>
-      <select id="ySelect"></select>
-
-      <button id="applyBtn">Terapkan</button>
-      <button id="resetBtn">Reset</button>
+  <!-- Controls Card -->
+  <div class="glass-card">
+    <div class="card-header">
+      <span class="card-icon">🎛️</span>
+      <h2 class="card-title">Control Panel</h2>
+    </div>
+    
+    <div class="controls-grid">
+      <div class="control-group">
+        <label class="control-label">Liga</label>
+        <select id="leagueSelect">
+          <option>Semua Liga</option>
+        </select>
+      </div>
+      
+      <div class="control-group">
+        <label class="control-label">Variabel X</label>
+        <select id="xSelect"></select>
+      </div>
+      
+      <div class="control-group">
+        <label class="control-label">Variabel Y</label>
+        <select id="ySelect"></select>
+      </div>
+      
+      <div class="control-group" style="display: flex; flex-direction: row; gap: 12px; align-items: flex-end;">
+        <button id="applyBtn">Terapkan Filter</button>
+        <button id="resetBtn" class="btn-secondary">Reset</button>
+      </div>
     </div>
 
-    <div id="sameVarDisclaimer" class="small-note" style="margin-top:8px; display:none; color:#b00;"></div>
+    <div id="sameVarDisclaimer" class="alert-box" style="display:none;"></div>
 
-    <div id="exec" style="margin-top:12px;">
-      <h3>📋 Executive Summary</h3>
-      <div id="execText" class="small-note"></div>
-    </div>
-  </div>
-
-  <div class="card">
-    <h4>📊 Ringkasan KPI</h4>
-    <div id="kpiArea"></div>
-  </div>
-
-  <div class="card">
-    <h4>⚙️ Distribusi Pemain Berdasarkan Liga</h4>
-    <div id="pie" class="plot"></div>
-    <div id="pieInterp" class="interp"></div>
-  </div>
-
-  <div class="grid">
-    <div class="card">
-      <h4>📈 Scatter Plot</h4>
-      <div id="scatter" class="plot"></div>
-      <div id="scatterInterp" class="interp"></div>
-    </div>
-
-    <div class="card">
-      <h4>🏆 Bar Chart (Top 10 Market Value)</h4>
-      <div id="bar" class="plot"></div>
-      <div id="barInterp" class="interp"></div>
-    </div>
-
-    <div class="card">
-      <h4>🟣 Box Plot (Distribusi Y)</h4>
-      <div id="box" class="plot"></div>
-      <div id="boxInterp" class="interp"></div>
-    </div>
-
-    <div class="card" style="grid-column: span 2;">
-      <h4>🔴 Heatmap Korelasi (Numerik)</h4>
-      <div id="heat" class="plot"></div>
-      <div id="heatInterp" class="interp"></div>
+    <div class="exec-summary" id="exec">
+      <h3>📊 Executive Summary</h3>
+      <div id="execText" class="exec-text"></div>
     </div>
   </div>
 
-  <div class="card">
-    <h4>📑 Analisis Temuan Dinamis</h4>
-    <div id="analysisText" class="interp"></div>
+  <!-- KPI Card -->
+  <div class="glass-card">
+    <div class="card-header">
+      <span class="card-icon">📈</span>
+      <h2 class="card-title">Key Performance Indicators</h2>
+    </div>
+    <div id="kpiArea" class="kpi-grid"></div>
   </div>
 
-  <footer style="text-align:center;color:#666;margin-top:10px;">Generated from <strong>merged_df.csv</strong></footer>
+  <!-- Distribution Chart -->
+  <div class="glass-card">
+    <div class="card-header">
+      <span class="card-icon">🥧</span>
+      <h2 class="card-title">Distribusi Pemain per Liga</h2>
+    </div>
+    <div class="chart-container">
+      <div id="pie" class="plot"></div>
+    </div>
+    <div id="pieInterp" class="interpretation"></div>
+  </div>
+
+  <!-- Charts Grid -->
+  <div class="charts-grid">
+    <!-- Scatter Plot -->
+    <div class="glass-card">
+      <div class="card-header">
+        <span class="card-icon">📊</span>
+        <h2 class="card-title">Scatter Plot</h2>
+      </div>
+      <div class="chart-container">
+        <div id="scatter" class="plot"></div>
+      </div>
+      <div id="scatterInterp" class="interpretation"></div>
+    </div>
+
+    <!-- Bar Chart -->
+    <div class="glass-card">
+      <div class="card-header">
+        <span class="card-icon">🏆</span>
+        <h2 class="card-title">Top 10 Market Value</h2>
+      </div>
+      <div class="chart-container">
+        <div id="bar" class="plot"></div>
+      </div>
+      <div id="barInterp" class="interpretation"></div>
+    </div>
+
+    <!-- Box Plot -->
+    <div class="glass-card">
+      <div class="card-header">
+        <span class="card-icon">📦</span>
+        <h2 class="card-title">Distribusi Box Plot</h2>
+      </div>
+      <div class="chart-container">
+        <div id="box" class="plot"></div>
+      </div>
+      <div id="boxInterp" class="interpretation"></div>
+    </div>
+  </div>
+
+  <!-- Heatmap -->
+  <div class="glass-card">
+    <div class="card-header">
+      <span class="card-icon">🔥</span>
+      <h2 class="card-title">Correlation Heatmap</h2>
+    </div>
+    <div class="chart-container">
+      <div id="heat" class="plot" style="min-height: 550px;"></div>
+    </div>
+    <div id="heatInterp" class="interpretation"></div>
+  </div>
+
+  <!-- Analysis -->
+  <div class="glass-card">
+    <div class="card-header">
+      <span class="card-icon">💡</span>
+      <h2 class="card-title">Analisis & Insight</h2>
+    </div>
+    <div id="analysisText" class="interpretation"></div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="dashboard-footer">
+    <p>
+      Powered by <span class="footer-highlight">Plotly.js</span> • 
+      Data from <span class="footer-highlight">merged_df.csv</span> • 
+      Built with ❤️ for Football Analytics
+    </p>
+  </footer>
+
 </div>
 
 <script>
-const DATA = [{"Country": "USA", "League": "MLS", "Club": "(ACM)", "Player Names": "zlatan ibrahimovic", "Matches_Played": 31, "Substitution": 0, "Mins": 2998, "Goals": 31, "xG": 22.72, "xG Per Avg Match": 0.72, "Shots": 159, "OnTarget": 67, "Shots Per Avg Match": 5.04, "On Target Per Avg Match": 2.12, "Year": 2019, "value": 3500000}, {"Country": "Spain", "League": "La Liga", "Club": "(ATL)", "Player Names": "luis suarez", "Matches_Played": 22, "Substitution": 6, "Mins": 2126, "Goals": 16, "xG": 14.32, "xG Per Avg Match": 0.64, "Shots": 79, "OnTarget": 42, "Shots Per Avg Match": 3.53, "On Target Per Avg Match": 1.88, "Year": 2019, "value": 28000000}, {"Country": "Spain", "League": "La Liga", "Club": "(RMA)", "Player Names": "karim benzema", "Matches_Played": 36, "Substitution": 1, "Mins": 3207, "Goals": 21, "xG": 21.61, "xG Per Avg Match": 0.64, "Shots": 124, "OnTarget": 59, "Shots Per Avg Match": 3.67, "On Target Per Avg Match": 1.75, "Year": 2019, "value": 32000000}, {"Country": "Spain", "League": "La Liga", "Club": "(ALA)", "Player Names": "joselu", "Matches_Played": 31, "Substitution": 5, "Mins": 2990, "Goals": 11, "xG": 13.22, "xG Per Avg Match": 0.42, "Shots": 87, "OnTarget": 30, "Shots Per Avg Match": 2.76, "On Target Per Avg Match": 0.95, "Year": 2019, "value": 5000000}, {"Country": "Spain", "League": "La Liga", "Club": "(SEV)", "Player Names": "carlos fernandez", "Matches_Played": 21, "Substitution": 13, "Mins": 2428, "Goals": 10, "xG": 10.48, "xG Per Avg Match": 0.41, "Shots": 47, "OnTarget": 19, "Shots Per Avg Match": 1.84, "On Target Per Avg Match": 0.74, "Year": 2019, "value": 3000000}, {"Country": "Spain", "League": "La Liga", "Club": "(OSA)", "Player Names": "ante budimir", "Matches_Played": 33, "Substitution": 2, "Mins": 2923, "Goals": 13, "xG": 12.31, "xG Per Avg Match": 0.4, "Shots": 56, "OnTarget": 22, "Shots Per Avg Match": 1.82, "On Target Per Avg Match": 0.72, "Year": 2019, "value": 6000000}, {"Country": "Spain", "League": "La Liga", "Club": "(SOC)", "Player Names": "mikel oyarzabal", "Matches_Played": 36, "Substitution": 1, "Mins": 3247, "Goals": 10, "xG": 8.89, "xG Per Avg Match": 0.26, "Shots": 62, "OnTarget": 22, "Shots Per Avg Match": 1.81, "On Target Per Avg Match": 0.64, "Year": 2019, "value": 48000000}, {"Country": "Spain", "League": "La Liga", "Club": "(VIL)", "Player Names": "gerard moreno", "Matches_Played": 33, "Substitution": 2, "Mins": 2831, "Goals": 18, "xG": 16.09, "xG Per Avg Match": 0.54, "Shots": 89, "OnTarget": 34, "Shots Per Avg Match": 2.99, "On Target Per Avg Match": 1.14, "Year": 2019, "value": 16000000}, {"Country": "Spain", "League": "La Liga", "Club": "(BAR)", "Player Names": "lionel messi", "Matches_Played": 32, "Substitution": 1, "Mins": 3067, "Goals": 25, "xG": 21.63, "xG Per Avg Match": 0.67, "Shots": 159, "OnTarget": 68, "Shots Per Avg Match": 4.93, "On Target Per Avg Match": 2.11, "Year": 2019, "value": 112000000}, {"Country": "Spain", "League": "La Liga", "Club": "(RMA)", "Player Names": "sergio ramos", "Matches_Played": 35, "Substitution": 0, "Mins": 3100, "Goals": 11, "xG": 11.09, "xG Per Avg Match": 0.34, "Shots": 39, "OnTarget": 17, "Shots Per Avg Match": 1.2, "On Target Per Avg Match": 0.52, "Year": 2019, "value": 14000000}, {"Country": "Spain", "League": "La Liga", "Club": "(SEV)", "Player Names": "lucas ocampos", "Matches_Played": 31, "Substitution": 2, "Mins": 2929, "Goals": 14, "xG": 13.26, "xG Per Avg Match": 0.43, "Shots": 84, "OnTarget": 36, "Shots Per Avg Match": 2.72, "On Target Per Avg Match": 1.17, "Year": 2019, "value": 32000000}, {"Country": "Spain", "League": "La Liga", "Club": "(GET)", "Player Names": "jaime mata", "Matches_Played": 33, "Substitution": 1, "Mins": 2923, "Goals": 11, "xG": 12.0, "xG Per Avg Match": 0.39, "Shots": 58, "OnTarget": 23, "Shots Per Avg Match": 1.89, "On Target Per Avg Match": 0.75, "Year": 2019, "value": 8000000}, {"Country": "Spain", "League": "La Liga", "Club": "(CEL)", "Player Names": "iago aspas", "Matches_Played": 37, "Substitution": 0, "Mins": 3474, "Goals": 14, "xG": 15.72, "xG Per Avg Match": 0.43, "Shots": 84, "OnTarget": 39, "Shots Per Avg Match": 2.3, "On Target Per Avg Match": 1.07, "Year": 2019, "value": 16000000}, {"Country": "Portugal ", "League": "Primeira Liga", "Club": "(BRA)", "Player Names": "paulinho", "Matches_Played": 27, "Substitution": 2, "Mins": 2451, "Goals": 17, "xG": 14.96, "xG Per Avg Match": 0.58, "Shots": 89, "OnTarget": 38, "Shots Per Avg Match": 3.45, "On Target Per Avg Match": 1.47, "Year": 2019, "value": 13500000}, {"Country": "Portugal ", "League": "Primeira Liga", "Club": "(MNU)", "Player Names": "bruno fernandes", "Matches_Played": 17, "Substitution": 0, "Mins": 1656, "Goals": 8, "xG": 5.58, "xG Per Avg Match": 0.32, "Shots": 60, "OnTarget": 23, "Shots Per Avg Match": 3.44, "On Target Per Avg Match": 1.32, "Year": 2019, "value": 48000000}, {"Country": "Portugal ", "League": "Primeira Liga", "Club": "(BOA)", "Player Names": "angel gomes", "Matches_Played": 6, "Substitution": 0, "Mins": 530, "Goals": 3, "xG": 1.12, "xG Per Avg Match": 0.2, "Shots": 12, "OnTarget": 3, "Shots Per Avg Match": 2.15, "On Target Per Avg Match": 0.54, "Year": 2019, "value": 3000000}, {"Country": "Italy", "League": "Serie A", "Club": "(NAP)", "Player Names": "arkadiusz milik", "Matches_Played": 19, "Substitution": 7, "Mins": 1870, "Goals": 11, "xG": 9.45, "xG Per Avg Match": 0.48, "Shots": 68, "OnTarget": 29, "Shots Per Avg Match": 3.45, "On Target Per Avg Match": 1.47, "Year": 2019, "value": 32000000}, {"Country": "Italy", "League": "Serie A", "Club": "(INT)", "Player Names": "romelu lukaku", "Matches_Played": 33, "Substitution": 3, "Mins": 3156, "Goals": 23, "xG": 18.94, "xG Per Avg Match": 0.57, "Shots": 99, "OnTarget": 47, "Shots Per Avg Match": 2.98, "On Target Per Avg Match": 1.41, "Year": 2019, "value": 68000000}, {"Country": "Italy", "League": "Serie A", "Club": "(Sassuolo )", "Player Names": "francesco caputo", "Matches_Played": 33, "Substitution": 3, "Mins": 3125, "Goals": 21, "xG": 13.82, "xG Per Avg Match": 0.42, "Shots": 73, "OnTarget": 35, "Shots Per Avg Match": 2.22, "On Target Per Avg Match": 1.06, "Year": 2019, "value": 5000000}, {"Country": "Italy", "League": "Serie A", "Club": "(NAP)", "Player Names": "andrea petagna", "Matches_Played": 33, "Substitution": 3, "Mins": 3263, "Goals": 12, "xG": 13.74, "xG Per Avg Match": 0.4, "Shots": 110, "OnTarget": 33, "Shots Per Avg Match": 3.2, "On Target Per Avg Match": 0.96, "Year": 2019, "value": 14000000}, {"Country": "Italy", "League": "Serie A", "Club": "(JUV)", "Player Names": "cristiano ronaldo", "Matches_Played": 33, "Substitution": 0, "Mins": 3127, "Goals": 31, "xG": 27.32, "xG Per Avg Match": 0.83, "Shots": 208, "OnTarget": 79, "Shots Per Avg Match": 6.32, "On Target Per Avg Match": 2.4, "Year": 2019, "value": 60000000}, {"Country": "Italy", "League": "Serie A", "Club": "(SAS)", "Player Names": "domenico berardi", "Matches_Played": 29, "Substitution": 2, "Mins": 2654, "Goals": 14, "xG": 10.9, "xG Per Avg Match": 0.39, "Shots": 120, "OnTarget": 46, "Shots Per Avg Match": 4.3, "On Target Per Avg Match": 1.65, "Year": 2019, "value": 19000000}, {"Country": "Italy", "League": "Serie A", "Club": "(CAG)", "Player Names": "joao pedro", "Matches_Played": 35, "Substitution": 1, "Mins": 3394, "Goals": 18, "xG": 13.93, "xG Per Avg Match": 0.39, "Shots": 87, "OnTarget": 37, "Shots Per Avg Match": 2.44, "On Target Per Avg Match": 1.04, "Year": 2019, "value": 14000000}, {"Country": "Italy", "League": "Serie A", "Club": "(CAG)", "Player Names": "joao pedro", "Matches_Played": 35, "Substitution": 1, "Mins": 3394, "Goals": 18, "xG": 13.93, "xG Per Avg Match": 0.39, "Shots": 87, "OnTarget": 37, "Shots Per Avg Match": 2.44, "On Target Per Avg Match": 1.04, "Year": 2019, "value": 12000000}, {"Country": "Italy", "League": "Serie A", "Club": "(ATA)", "Player Names": "josip ilicic", "Matches_Played": 21, "Substitution": 5, "Mins": 1786, "Goals": 15, "xG": 9.78, "xG Per Avg Match": 0.52, "Shots": 81, "OnTarget": 36, "Shots Per Avg Match": 4.31, "On Target Per Avg Match": 1.91, "Year": 2019, "value": 15000000}, {"Country": "Italy", "League": "Serie A", "Club": null, "Player Names": "andreas cornelius", "Matches_Played": 17, "Substitution": 9, "Mins": 1637, "Goals": 12, "xG": 6.38, "xG Per Avg Match": 0.37, "Shots": 46, "OnTarget": 20, "Shots Per Avg Match": 2.67, "On Target Per Avg Match": 1.16, "Year": 2019, "value": 8000000}, {"Country": "Italy", "League": "Serie A", "Club": "(CAG)", "Player Names": "giovanni simeone", "Matches_Played": 34, "Substitution": 3, "Mins": 3115, "Goals": 12, "xG": 11.8, "xG Per Avg Match": 0.36, "Shots": 87, "OnTarget": 30, "Shots Per Avg Match": 2.65, "On Target Per Avg Match": 0.91, "Year": 2019, "value": 13000000}, {"Country": "Italy", "League": "Serie A", "Club": "(LAZ)", "Player Names": "ciro immobile", "Matches_Played": 36, "Substitution": 1, "Mins": 3371, "Goals": 36, "xG": 26.61, "xG Per Avg Match": 0.75, "Shots": 142, "OnTarget": 71, "Shots Per Avg Match": 4.0, "On Target Per Avg Match": 2.0, "Year": 2019, "value": 40000000}, {"Country": "Italy", "League": "Serie A", "Club": "(LEC)", "Player Names": "marco mancosu", "Matches_Played": 28, "Substitution": 5, "Mins": 2627, "Goals": 14, "xG": 15.21, "xG Per Avg Match": 0.55, "Shots": 84, "OnTarget": 31, "Shots Per Avg Match": 3.04, "On Target Per Avg Match": 1.12, "Year": 2019, "value": 2000000}, {"Country": "Italy", "League": "Serie A", "Club": "(ATA)", "Player Names": "duvan zapata", "Matches_Played": 25, "Substitution": 3, "Mins": 2143, "Goals": 18, "xG": 15.11, "xG Per Avg Match": 0.67, "Shots": 89, "OnTarget": 37, "Shots Per Avg Match": 3.95, "On Target Per Avg Match": 1.64, "Year": 2019, "value": 36000000}, {"Country": "Italy", "League": "Serie A", "Club": "(ATA)", "Player Names": "luis muriel", "Matches_Played": 10, "Substitution": 23, "Mins": 1370, "Goals": 18, "xG": 12.4, "xG Per Avg Match": 0.86, "Shots": 77, "OnTarget": 41, "Shots Per Avg Match": 5.34, "On Target Per Avg Match": 2.84, "Year": 2019, "value": 15000000}, {"Country": "Italy", "League": "Serie A", "Club": "(SAM)", "Player Names": "fabio quagliarella", "Matches_Played": 26, "Substitution": 2, "Mins": 2413, "Goals": 11, "xG": 13.72, "xG Per Avg Match": 0.54, "Shots": 102, "OnTarget": 35, "Shots Per Avg Match": 4.02, "On Target Per Avg Match": 1.38, "Year": 2019, "value": 1000000}, {"Country": "Italy", "League": "Serie A", "Club": "(BEN)", "Player Names": "gianluca lapadula", "Matches_Played": 20, "Substitution": 5, "Mins": 1906, "Goals": 11, "xG": 9.43, "xG Per Avg Match": 0.47, "Shots": 61, "OnTarget": 24, "Shots Per Avg Match": 3.04, "On Target Per Avg Match": 1.2, "Year": 2019, "value": 4000000}, {"Country": "Italy", "League": "Serie A", "Club": "(TOR)", "Player Names": "andrea belotti", "Matches_Played": 34, "Substitution": 2, "Mins": 3214, "Goals": 16, "xG": 16.58, "xG Per Avg Match": 0.49, "Shots": 104, "OnTarget": 41, "Shots Per Avg Match": 3.07, "On Target Per Avg Match": 1.21, "Year": 2019, "value": 32000000}, {"Country": "Germany", "League": "Bundesliga", "Club": "(DOR)", "Player Names": "jadon sancho", "Matches_Played": 25, "Substitution": 7, "Mins": 2387, "Goals": 17, "xG": 9.8, "xG Per Avg Match": 0.39, "Shots": 52, "OnTarget": 28, "Shots Per Avg Match": 2.07, "On Target Per Avg Match": 1.11, "Year": 2019, "value": 117000000}, {"Country": "Germany", "League": "Bundesliga", "Club": "(CHE)", "Player Names": "timo werner", "Matches_Played": 33, "Substitution": 1, "Mins": 2744, "Goals": 28, "xG": 20.8, "xG Per Avg Match": 0.72, "Shots": 123, "OnTarget": 63, "Shots Per Avg Match": 4.26, "On Target Per Avg Match": 2.18, "Year": 2019, "value": 64000000}, {"Country": "Germany", "League": "Bundesliga", "Club": "(WOB)", "Player Names": "wout weghorst", "Matches_Played": 30, "Substitution": 2, "Mins": 2893, "Goals": 16, "xG": 18.27, "xG Per Avg Match": 0.6, "Shots": 85, "OnTarget": 38, "Shots Per Avg Match": 2.79, "On Target Per Avg Match": 1.25, "Year": 2019, "value": 21000000}, {"Country": "Germany", "League": "Bundesliga", "Club": "(DOR)", "Player Names": "marco reus", "Matches_Played": 18, "Substitution": 1, "Mins": 1561, "Goals": 11, "xG": 8.54, "xG Per Avg Match": 0.52, "Shots": 47, "OnTarget": 24, "Shots Per Avg Match": 2.86, "On Target Per Avg Match": 1.46, "Year": 2019, "value": 32000000}, {"Country": "Germany", "League": "Bundesliga", "Club": "(CHE)", "Player Names": "kai havertz", "Matches_Played": 29, "Substitution": 1, "Mins": 2586, "Goals": 12, "xG": 9.53, "xG Per Avg Match": 0.35, "Shots": 59, "OnTarget": 26, "Shots Per Avg Match": 2.17, "On Target Per Avg Match": 0.96, "Year": 2019, "value": 81000000}, {"Country": "Germany", "League": "Bundesliga", "Club": "(BMG)", "Player Names": "marcus thuram", "Matches_Played": 28, "Substitution": 3, "Mins": 2296, "Goals": 10, "xG": 10.15, "xG Per Avg Match": 0.42, "Shots": 56, "OnTarget": 36, "Shots Per Avg Match": 2.32, "On Target Per Avg Match": 1.49, "Year": 2019, "value": 22000000}, {"Country": "Germany", "League": "Bundesliga", "Club": "(DUS)", "Player Names": "rouwen hennings", "Matches_Played": 27, "Substitution": 5, "Mins": 2592, "Goals": 15, "xG": 10.91, "xG Per Avg Match": 0.4, "Shots": 73, "OnTarget": 27, "Shots Per Avg Match": 2.68, "On Target Per Avg Match": 0.99, "Year": 2019, "value": 2000000}, {"Country": "Germany", "League": "Bundesliga", "Club": "(BAY)", "Player Names": "robert lewandowski", "Matches_Played": 31, "Substitution": 0, "Mins": 2783, "Goals": 34, "xG": 31.05, "xG Per Avg Match": 1.06, "Shots": 138, "OnTarget": 67, "Shots Per Avg Match": 4.71, "On Target Per Avg Match": 2.29, "Year": 2019, "value": 56000000}, {"Country": "Germany", "League": "Bundesliga", "Club": "(FCA)", "Player Names": "florian niederlechner", "Matches_Played": 31, "Substitution": 2, "Mins": 2846, "Goals": 13, "xG": 13.18, "xG Per Avg Match": 0.44, "Shots": 78, "OnTarget": 40, "Shots Per Avg Match": 2.6, "On Target Per Avg Match": 1.34, "Year": 2019, "value": 8000000}, {"Country": "Germany", "League": "Bundesliga", "Club": "(DOR)", "Player Names": "erling haaland", "Matches_Played": 11, "Substitution": 4, "Mins": 1116, "Goals": 12, "xG": 7.64, "xG Per Avg Match": 0.65, "Shots": 34, "OnTarget": 19, "Shots Per Avg Match": 2.89, "On Target Per Avg Match": 1.62, "Year": 2019, "value": 72000000}, {"Country": "Germany", "League": "Bundesliga", "Club": "(MON)", "Player Names": "kevin volland", "Matches_Played": 24, "Substitution": 3, "Mins": 2159, "Goals": 10, "xG": 11.59, "xG Per Avg Match": 0.51, "Shots": 78, "OnTarget": 32, "Shots Per Avg Match": 3.43, "On Target Per Avg Match": 1.41, "Year": 2019, "value": 28000000}, {"Country": "Germany", "League": "Bundesliga", "Club": "(SCF)", "Player Names": "nils petersen", "Matches_Played": 24, "Substitution": 10, "Mins": 2595, "Goals": 11, "xG": 8.47, "xG Per Avg Match": 0.31, "Shots": 55, "OnTarget": 19, "Shots Per Avg Match": 2.01, "On Target Per Avg Match": 0.7, "Year": 2019, "value": 6000000}, {"Country": "Germany", "League": "Bundesliga", "Club": "(BMG)", "Player Names": "lars stindl", "Matches_Played": 14, "Substitution": 11, "Mins": 1518, "Goals": 9, "xG": 7.19, "xG Per Avg Match": 0.45, "Shots": 33, "OnTarget": 15, "Shots Per Avg Match": 2.07, "On Target Per Avg Match": 0.94, "Year": 2019, "value": 6000000}, {"Country": "Germany", "League": "Bundesliga", "Club": "(MAI)", "Player Names": "robin quaison", "Matches_Played": 31, "Substitution": 1, "Mins": 2718, "Goals": 13, "xG": 12.02, "xG Per Avg Match": 0.42, "Shots": 71, "OnTarget": 28, "Shots Per Avg Match": 2.48, "On Target Per Avg Match": 0.98, "Year": 2019, "value": 10000000}, {"Country": "Germany", "League": "Bundesliga", "Club": "(BAY)", "Player Names": "serge gnabry", "Matches_Played": 26, "Substitution": 5, "Mins": 2216, "Goals": 12, "xG": 13.3, "xG Per Avg Match": 0.57, "Shots": 95, "OnTarget": 40, "Shots Per Avg Match": 4.07, "On Target Per Avg Match": 1.71, "Year": 2019, "value": 72000000}, {"Country": "Germany", "League": "Bundesliga", "Club": "(KOL)", "Player Names": "sebastian andersson", "Matches_Played": 31, "Substitution": 2, "Mins": 2813, "Goals": 12, "xG": 13.62, "xG Per Avg Match": 0.46, "Shots": 65, "OnTarget": 37, "Shots Per Avg Match": 2.2, "On Target Per Avg Match": 1.25, "Year": 2019, "value": 4000000}, {"Country": "Germany", "League": "Bundesliga", "Club": "(BMG)", "Player Names": "alassane plea", "Matches_Played": 25, "Substitution": 2, "Mins": 2252, "Goals": 10, "xG": 11.62, "xG Per Avg Match": 0.49, "Shots": 77, "OnTarget": 35, "Shots Per Avg Match": 3.25, "On Target Per Avg Match": 1.48, "Year": 2019, "value": 35000000}, {"Country": "France", "League": "France Ligue 7", "Club": "(PSG)", "Player Names": "neymar", "Matches_Played": 15, "Substitution": 0, "Mins": 1396, "Goals": 12, "xG": 15.87, "xG Per Avg Match": 1.08, "Shots": 71, "OnTarget": 36, "Shots Per Avg Match": 4.83, "On Target Per Avg Match": 2.45, "Year": 2019, "value": 128000000}, {"Country": "France", "League": "France Ligue 13", "Club": "(MAR)", "Player Names": "dimitri payet", "Matches_Played": 22, "Substitution": 0, "Mins": 2057, "Goals": 9, "xG": 5.85, "xG Per Avg Match": 0.27, "Shots": 63, "OnTarget": 26, "Shots Per Avg Match": 2.91, "On Target Per Avg Match": 1.2, "Year": 2019, "value": 10000000}, {"Country": "France", "League": "France Ligue 6", "Club": "(PSG)", "Player Names": "mauro icardi", "Matches_Played": 14, "Substitution": 6, "Mins": 1353, "Goals": 12, "xG": 12.11, "xG Per Avg Match": 0.85, "Shots": 36, "OnTarget": 20, "Shots Per Avg Match": 2.53, "On Target Per Avg Match": 1.4, "Year": 2019, "value": 60000000}, {"Country": "France", "League": "France Ligue 15", "Club": "(LYO)", "Player Names": "memphis depay", "Matches_Played": 12, "Substitution": 1, "Mins": 1077, "Goals": 9, "xG": 4.53, "xG Per Avg Match": 0.4, "Shots": 48, "OnTarget": 21, "Shots Per Avg Match": 4.23, "On Target Per Avg Match": 1.85, "Year": 2019, "value": 44000000}, {"Country": "France", "League": "France Ligue 9", "Club": "(NIC)", "Player Names": "kasper dolberg", "Matches_Played": 22, "Substitution": 1, "Mins": 1994, "Goals": 11, "xG": 7.77, "xG Per Avg Match": 0.37, "Shots": 42, "OnTarget": 25, "Shots Per Avg Match": 2.0, "On Target Per Avg Match": 1.19, "Year": 2019, "value": 16000000}, {"Country": "France", "League": "France Ligue 20", "Club": "(STR)", "Player Names": "adrien thomasson", "Matches_Played": 24, "Substitution": 1, "Mins": 2168, "Goals": 7, "xG": 5.25, "xG Per Avg Match": 0.23, "Shots": 50, "OnTarget": 18, "Shots Per Avg Match": 2.19, "On Target Per Avg Match": 0.79, "Year": 2019, "value": 6000000}, {"Country": "France", "League": "France Ligue 12", "Club": "(MPE)", "Player Names": "andy delort", "Matches_Played": 26, "Substitution": 0, "Mins": 2409, "Goals": 9, "xG": 10.9, "xG Per Avg Match": 0.43, "Shots": 84, "OnTarget": 29, "Shots Per Avg Match": 3.31, "On Target Per Avg Match": 1.14, "Year": 2019, "value": 10000000}, {"Country": "France", "League": "France Ligue 2", "Club": "(MON)", "Player Names": "wissam ben yedder", "Matches_Played": 25, "Substitution": 1, "Mins": 2321, "Goals": 18, "xG": 12.95, "xG Per Avg Match": 0.53, "Shots": 64, "OnTarget": 36, "Shots Per Avg Match": 2.62, "On Target Per Avg Match": 1.47, "Year": 2019, "value": 40000000}, {"Country": "France", "League": "France Ligue 19", "Club": "(STR)", "Player Names": "ludovic ajorque", "Matches_Played": 24, "Substitution": 2, "Mins": 2163, "Goals": 8, "xG": 6.6, "xG Per Avg Match": 0.29, "Shots": 50, "OnTarget": 22, "Shots Per Avg Match": 2.2, "On Target Per Avg Match": 0.97, "Year": 2019, "value": 6000000}, {"Country": "France", "League": "France Ligue 14", "Club": "(LEI)", "Player Names": "islam slimani", "Matches_Played": 14, "Substitution": 4, "Mins": 1378, "Goals": 9, "xG": 8.7, "xG Per Avg Match": 0.6, "Shots": 53, "OnTarget": 20, "Shots Per Avg Match": 3.65, "On Target Per Avg Match": 1.38, "Year": 2019, "value": 6000000}, {"Country": "France", "League": "France Ligue 17", "Club": "(REN)", "Player Names": "adrien hunou", "Matches_Played": 13, "Substitution": 10, "Mins": 1325, "Goals": 8, "xG": 7.25, "xG Per Avg Match": 0.52, "Shots": 28, "OnTarget": 15, "Shots Per Avg Match": 2.01, "On Target Per Avg Match": 1.08, "Year": 2019, "value": 4000000}, {"Country": "France", "League": "France Ligue 10", "Club": "(STE)", "Player Names": "denis bouanga", "Matches_Played": 23, "Substitution": 3, "Mins": 2173, "Goals": 10, "xG": 9.38, "xG Per Avg Match": 0.41, "Shots": 78, "OnTarget": 37, "Shots Per Avg Match": 3.41, "On Target Per Avg Match": 1.62, "Year": 2019, "value": 8000000}, {"Country": "France", "League": "France Ligue 16", "Club": "(REN)", "Player Names": "sehrou guirassy", "Matches_Played": 23, "Substitution": 0, "Mins": 2030, "Goals": 9, "xG": 8.55, "xG Per Avg Match": 0.4, "Shots": 45, "OnTarget": 19, "Shots Per Avg Match": 2.11, "On Target Per Avg Match": 0.89, "Year": 2019, "value": 15000000}, {"Country": "France", "League": "France Ligue 5", "Club": "(STR)", "Player Names": "habib diallo", "Matches_Played": 26, "Substitution": 0, "Mins": 2344, "Goals": 12, "xG": 9.13, "xG Per Avg Match": 0.37, "Shots": 83, "OnTarget": 34, "Shots Per Avg Match": 3.36, "On Target Per Avg Match": 1.38, "Year": 2019, "value": 12000000}, {"Country": "France", "League": "France Ligue 4", "Club": "(NAP)", "Player Names": "victor osimhen", "Matches_Played": 25, "Substitution": 2, "Mins": 2434, "Goals": 13, "xG": 14.86, "xG Per Avg Match": 0.58, "Shots": 86, "OnTarget": 35, "Shots Per Avg Match": 3.36, "On Target Per Avg Match": 1.37, "Year": 2019, "value": 27000000}, {"Country": "England", "League": "Premier League", "Club": "(MNC)", "Player Names": "kevin de bruyne", "Matches_Played": 32, "Substitution": 3, "Mins": 2984, "Goals": 13, "xG": 7.22, "xG Per Avg Match": 0.23, "Shots": 99, "OnTarget": 31, "Shots Per Avg Match": 3.15, "On Target Per Avg Match": 0.99, "Year": 2019, "value": 120000000}, {"Country": "England", "League": "Premier League", "Club": "(LEI)", "Player Names": "jamie vardy", "Matches_Played": 34, "Substitution": 1, "Mins": 3271, "Goals": 23, "xG": 19.28, "xG Per Avg Match": 0.56, "Shots": 89, "OnTarget": 42, "Shots Per Avg Match": 2.58, "On Target Per Avg Match": 1.22, "Year": 2019, "value": 16000000}, {"Country": "England", "League": "Premier League", "Club": "(MNC)", "Player Names": "raheem sterling", "Matches_Played": 30, "Substitution": 3, "Mins": 2836, "Goals": 20, "xG": 20.3, "xG Per Avg Match": 0.68, "Shots": 99, "OnTarget": 38, "Shots Per Avg Match": 3.32, "On Target Per Avg Match": 1.27, "Year": 2019, "value": 128000000}, {"Country": "England", "League": "Premier League", "Club": "(BUR)", "Player Names": "chris wood", "Matches_Played": 29, "Substitution": 3, "Mins": 2616, "Goals": 14, "xG": 17.07, "xG Per Avg Match": 0.62, "Shots": 65, "OnTarget": 29, "Shots Per Avg Match": 2.36, "On Target Per Avg Match": 1.05, "Year": 2019, "value": 14000000}, {"Country": "England", "League": "Premier League", "Club": "(MNU)", "Player Names": "anthony martial", "Matches_Played": 31, "Substitution": 1, "Mins": 2788, "Goals": 17, "xG": 11.74, "xG Per Avg Match": 0.4, "Shots": 80, "OnTarget": 39, "Shots Per Avg Match": 2.73, "On Target Per Avg Match": 1.33, "Year": 2019, "value": 48000000}, {"Country": "England", "League": "Premier League", "Club": "(MNC)", "Player Names": "riyad mahrez", "Matches_Played": 21, "Substitution": 12, "Mins": 2130, "Goals": 11, "xG": 7.62, "xG Per Avg Match": 0.34, "Shots": 74, "OnTarget": 31, "Shots Per Avg Match": 3.3, "On Target Per Avg Match": 1.38, "Year": 2019, "value": 48000000}, {"Country": "England", "League": "Premier League", "Club": "(MNU)", "Player Names": "marcus rashford", "Matches_Played": 31, "Substitution": 0, "Mins": 2826, "Goals": 17, "xG": 19.93, "xG Per Avg Match": 0.67, "Shots": 95, "OnTarget": 44, "Shots Per Avg Match": 3.19, "On Target Per Avg Match": 1.48, "Year": 2019, "value": 64000000}, {"Country": "England", "League": "Premier League", "Club": "(LIV)", "Player Names": "mohamed salah", "Matches_Played": 33, "Substitution": 1, "Mins": 3045, "Goals": 19, "xG": 20.51, "xG Per Avg Match": 0.64, "Shots": 132, "OnTarget": 59, "Shots Per Avg Match": 4.12, "On Target Per Avg Match": 1.84, "Year": 2019, "value": 120000000}, {"Country": "England", "League": "Premier League", "Club": "(MNC)", "Player Names": "gabriel jesus", "Matches_Played": 21, "Substitution": 13, "Mins": 2209, "Goals": 14, "xG": 20.69, "xG Per Avg Match": 0.89, "Shots": 101, "OnTarget": 46, "Shots Per Avg Match": 4.34, "On Target Per Avg Match": 1.98, "Year": 2019, "value": 56000000}, {"Country": "England", "League": "Premier League", "Club": "(SOU)", "Player Names": "danny ings", "Matches_Played": 32, "Substitution": 6, "Mins": 3009, "Goals": 22, "xG": 16.79, "xG Per Avg Match": 0.53, "Shots": 93, "OnTarget": 37, "Shots Per Avg Match": 2.94, "On Target Per Avg Match": 1.17, "Year": 2019, "value": 17000000}, {"Country": "England", "League": "Premier League", "Club": "(TOT)", "Player Names": "harry kane", "Matches_Played": 29, "Substitution": 0, "Mins": 2801, "Goals": 18, "xG": 12.97, "xG Per Avg Match": 0.44, "Shots": 81, "OnTarget": 37, "Shots Per Avg Match": 2.75, "On Target Per Avg Match": 1.25, "Year": 2019, "value": 120000000}, {"Country": "England", "League": "Premier League", "Club": "(EVE)", "Player Names": "richarlison", "Matches_Played": 36, "Substitution": 0, "Mins": 3289, "Goals": 13, "xG": 10.73, "xG Per Avg Match": 0.31, "Shots": 90, "OnTarget": 32, "Shots Per Avg Match": 2.6, "On Target Per Avg Match": 0.92, "Year": 2019, "value": 60000000}, {"Country": "England", "League": "Premier League", "Club": "(NOR)", "Player Names": "teemu pukki", "Matches_Played": 33, "Substitution": 3, "Mins": 3087, "Goals": 11, "xG": 11.37, "xG Per Avg Match": 0.35, "Shots": 80, "OnTarget": 35, "Shots Per Avg Match": 2.46, "On Target Per Avg Match": 1.08, "Year": 2019, "value": 8000000}, {"Country": "England", "League": "Premier League", "Club": "(CHE)", "Player Names": "tammy abraham", "Matches_Played": 25, "Substitution": 9, "Mins": 2380, "Goals": 15, "xG": 19.29, "xG Per Avg Match": 0.77, "Shots": 88, "OnTarget": 35, "Shots Per Avg Match": 3.51, "On Target Per Avg Match": 1.4, "Year": 2019, "value": 40000000}, {"Country": "Brazil", "League": "Campeonato Brasileiro SÃ©rie A", "Club": "(SAN)", "Player Names": "carlos sanchez", "Matches_Played": 27, "Substitution": 7, "Mins": 2648, "Goals": 12, "xG": 11.99, "xG Per Avg Match": 0.43, "Shots": 85, "OnTarget": 29, "Shots Per Avg Match": 3.05, "On Target Per Avg Match": 1.04, "Year": 2019, "value": 1000000}, {"Country": " Netherlands", "League": "Eredivisie", "Club": "(AJA)", "Player Names": "davy klaassen", "Matches_Played": 6, "Substitution": 0, "Mins": 490, "Goals": 5, "xG": 4.02, "xG Per Avg Match": 0.78, "Shots": 13, "OnTarget": 8, "Shots Per Avg Match": 2.52, "On Target Per Avg Match": 1.55, "Year": 2019, "value": 12000000}, {"Country": "Spain", "League": "La Liga", "Club": "(SOC)", "Player Names": "portu", "Matches_Played": 6, "Substitution": 5, "Mins": 691, "Goals": 4, "xG": 1.53, "xG Per Avg Match": 0.21, "Shots": 6, "OnTarget": 4, "Shots Per Avg Match": 0.82, "On Target Per Avg Match": 0.55, "Year": 2020, "value": 16000000}, {"Country": "Spain", "League": "La Liga", "Club": "(RMA)", "Player Names": "karim benzema", "Matches_Played": 8, "Substitution": 0, "Mins": 741, "Goals": 4, "xG": 4.91, "xG Per Avg Match": 0.63, "Shots": 27, "OnTarget": 12, "Shots Per Avg Match": 3.46, "On Target Per Avg Match": 1.54, "Year": 2020, "value": 32000000}, {"Country": "Spain", "League": "La Liga", "Club": "(VAL)", "Player Names": "carlos soler", "Matches_Played": 6, "Substitution": 1, "Mins": 599, "Goals": 4, "xG": 3.34, "xG Per Avg Match": 0.53, "Shots": 8, "OnTarget": 5, "Shots Per Avg Match": 1.27, "On Target Per Avg Match": 0.79, "Year": 2020, "value": 40000000}, {"Country": "Spain", "League": "La Liga", "Club": "(BET)", "Player Names": "cristian tello", "Matches_Played": 7, "Substitution": 4, "Mins": 629, "Goals": 4, "xG": 1.92, "xG Per Avg Match": 0.29, "Shots": 22, "OnTarget": 8, "Shots Per Avg Match": 3.32, "On Target Per Avg Match": 1.21, "Year": 2020, "value": 4000000}, {"Country": "Spain", "League": "La Liga", "Club": "(SOC)", "Player Names": "mikel oyarzabal", "Matches_Played": 9, "Substitution": 2, "Mins": 736, "Goals": 7, "xG": 6.82, "xG Per Avg Match": 0.88, "Shots": 31, "OnTarget": 16, "Shots Per Avg Match": 4.0, "On Target Per Avg Match": 2.07, "Year": 2020, "value": 48000000}, {"Country": "Spain", "League": "La Liga", "Club": "(EIB)", "Player Names": "esteban burgos", "Matches_Played": 6, "Substitution": 1, "Mins": 589, "Goals": 3, "xG": 2.85, "xG Per Avg Match": 0.46, "Shots": 5, "OnTarget": 4, "Shots Per Avg Match": 0.81, "On Target Per Avg Match": 0.65, "Year": 2020, "value": 72500}, {"Country": "Spain", "League": "La Liga", "Club": "(BAR)", "Player Names": "lionel messi", "Matches_Played": 8, "Substitution": 1, "Mins": 824, "Goals": 4, "xG": 5.46, "xG Per Avg Match": 0.63, "Shots": 39, "OnTarget": 19, "Shots Per Avg Match": 4.5, "On Target Per Avg Match": 2.19, "Year": 2020, "value": 112000000}, {"Country": "Spain", "League": "La Liga", "Club": "(ATL)", "Player Names": "luis suarez", "Matches_Played": 5, "Substitution": 1, "Mins": 387, "Goals": 5, "xG": 3.3, "xG Per Avg Match": 0.81, "Shots": 22, "OnTarget": 8, "Shots Per Avg Match": 5.4, "On Target Per Avg Match": 1.96, "Year": 2020, "value": 28000000}, {"Country": "Spain", "League": "La Liga", "Club": "(VIL)", "Player Names": "paco alcacer", "Matches_Played": 9, "Substitution": 0, "Mins": 693, "Goals": 5, "xG": 5.11, "xG Per Avg Match": 0.7, "Shots": 16, "OnTarget": 8, "Shots Per Avg Match": 2.19, "On Target Per Avg Match": 1.1, "Year": 2020, "value": 28000000}, {"Country": "Spain", "League": "La Liga", "Club": "(VIL)", "Player Names": "paco alcacer", "Matches_Played": 9, "Substitution": 0, "Mins": 693, "Goals": 5, "xG": 5.11, "xG Per Avg Match": 0.7, "Shots": 16, "OnTarget": 8, "Shots Per Avg Match": 2.19, "On Target Per Avg Match": 1.1, "Year": 2020, "value": 28000000}, {"Country": "Spain", "League": "La Liga", "Club": "(RMA)", "Player Names": "federico valverde", "Matches_Played": 6, "Substitution": 2, "Mins": 566, "Goals": 3, "xG": 1.13, "xG Per Avg Match": 0.19, "Shots": 9, "OnTarget": 5, "Shots Per Avg Match": 1.51, "On Target Per Avg Match": 0.84, "Year": 2020, "value": 54000000}, {"Country": "Spain", "League": "La Liga", "Club": "(BAR)", "Player Names": "antoine griezmann", "Matches_Played": 8, "Substitution": 1, "Mins": 634, "Goals": 3, "xG": 3.67, "xG Per Avg Match": 0.55, "Shots": 18, "OnTarget": 8, "Shots Per Avg Match": 2.7, "On Target Per Avg Match": 1.2, "Year": 2020, "value": 96000000}, {"Country": "Spain", "League": "La Liga", "Club": "(CEL)", "Player Names": "iago aspas", "Matches_Played": 11, "Substitution": 0, "Mins": 1056, "Goals": 5, "xG": 4.89, "xG Per Avg Match": 0.44, "Shots": 21, "OnTarget": 12, "Shots Per Avg Match": 1.89, "On Target Per Avg Match": 1.08, "Year": 2020, "value": 16000000}, {"Country": "Spain", "League": "La Liga", "Club": "(BAR)", "Player Names": "ansu fati", "Matches_Played": 6, "Substitution": 1, "Mins": 451, "Goals": 4, "xG": 1.8, "xG Per Avg Match": 0.38, "Shots": 14, "OnTarget": 7, "Shots Per Avg Match": 2.95, "On Target Per Avg Match": 1.47, "Year": 2020, "value": 80000000}, {"Country": "Spain", "League": "La Liga", "Club": "(VIL)", "Player Names": "gerard moreno", "Matches_Played": 9, "Substitution": 0, "Mins": 822, "Goals": 6, "xG": 6.4, "xG Per Avg Match": 0.74, "Shots": 29, "OnTarget": 11, "Shots Per Avg Match": 3.35, "On Target Per Avg Match": 1.27, "Year": 2020, "value": 16000000}, {"Country": "Italy", "League": "Serie A", "Club": "(BOL)", "Player Names": "roberto soriano", "Matches_Played": 9, "Substitution": 0, "Mins": 849, "Goals": 5, "xG": 2.41, "xG Per Avg Match": 0.27, "Shots": 18, "OnTarget": 7, "Shots Per Avg Match": 2.01, "On Target Per Avg Match": 0.78, "Year": 2020, "value": 6000000}, {"Country": "Italy", "League": "Serie A", "Club": "(SAS)", "Player Names": "francesco caputo", "Matches_Played": 6, "Substitution": 0, "Mins": 567, "Goals": 5, "xG": 3.52, "xG Per Avg Match": 0.59, "Shots": 18, "OnTarget": 9, "Shots Per Avg Match": 3.02, "On Target Per Avg Match": 1.51, "Year": 2020, "value": 5000000}, {"Country": "Italy", "League": "Serie A", "Club": "(CAG)", "Player Names": "joao pedro", "Matches_Played": 9, "Substitution": 0, "Mins": 831, "Goals": 6, "xG": 3.41, "xG Per Avg Match": 0.39, "Shots": 21, "OnTarget": 10, "Shots Per Avg Match": 2.4, "On Target Per Avg Match": 1.14, "Year": 2020, "value": 14000000}, {"Country": "Italy", "League": "Serie A", "Club": "(CAG)", "Player Names": "joao pedro", "Matches_Played": 9, "Substitution": 0, "Mins": 831, "Goals": 6, "xG": 3.41, "xG Per Avg Match": 0.39, "Shots": 21, "OnTarget": 10, "Shots Per Avg Match": 2.4, "On Target Per Avg Match": 1.14, "Year": 2020, "value": 12000000}, {"Country": "Italy", "League": "Serie A", "Club": "(TOR)", "Player Names": "andrea belotti", "Matches_Played": 8, "Substitution": 0, "Mins": 754, "Goals": 7, "xG": 3.49, "xG Per Avg Match": 0.44, "Shots": 24, "OnTarget": 11, "Shots Per Avg Match": 3.02, "On Target Per Avg Match": 1.39, "Year": 2020, "value": 32000000}, {"Country": "Italy", "League": "Serie A", "Club": "(FIO)", "Player Names": "gaetano castrovilli", "Matches_Played": 9, "Substitution": 0, "Mins": 755, "Goals": 4, "xG": 1.43, "xG Per Avg Match": 0.18, "Shots": 11, "OnTarget": 7, "Shots Per Avg Match": 1.38, "On Target Per Avg Match": 0.88, "Year": 2020, "value": 20000000}, {"Country": "Italy", "League": "Serie A", "Club": "(CAG)", "Player Names": "giovanni simeone", "Matches_Played": 8, "Substitution": 0, "Mins": 664, "Goals": 5, "xG": 3.29, "xG Per Avg Match": 0.47, "Shots": 15, "OnTarget": 5, "Shots Per Avg Match": 2.15, "On Target Per Avg Match": 0.72, "Year": 2020, "value": 13000000}, {"Country": "Italy", "League": "Serie A", "Club": "(SAS)", "Player Names": "domenico berardi", "Matches_Played": 8, "Substitution": 0, "Mins": 766, "Goals": 4, "xG": 2.02, "xG Per Avg Match": 0.25, "Shots": 21, "OnTarget": 11, "Shots Per Avg Match": 2.6, "On Target Per Avg Match": 1.36, "Year": 2020, "value": 19000000}, {"Country": "Italy", "League": "Serie A", "Club": "(ROM)", "Player Names": "henrikh mkhitaryan", "Matches_Played": 9, "Substitution": 0, "Mins": 825, "Goals": 5, "xG": 5.82, "xG Per Avg Match": 0.67, "Shots": 30, "OnTarget": 14, "Shots Per Avg Match": 3.45, "On Target Per Avg Match": 1.61, "Year": 2020, "value": 20000000}, {"Country": "Italy", "League": "Serie A", "Club": "(ROM)", "Player Names": "henrikh mkhitaryan", "Matches_Played": 9, "Substitution": 0, "Mins": 825, "Goals": 5, "xG": 5.82, "xG Per Avg Match": 0.67, "Shots": 30, "OnTarget": 14, "Shots Per Avg Match": 3.45, "On Target Per Avg Match": 1.61, "Year": 2020, "value": 20000000}, {"Country": "Italy", "League": "Serie A", "Club": "(ROM)", "Player Names": "jordan veretout", "Matches_Played": 9, "Substitution": 0, "Mins": 769, "Goals": 4, "xG": 3.48, "xG Per Avg Match": 0.43, "Shots": 18, "OnTarget": 7, "Shots Per Avg Match": 2.22, "On Target Per Avg Match": 0.86, "Year": 2020, "value": 20000000}, {"Country": "Italy", "League": "Serie A", "Club": "(PAR)", "Player Names": "gervinho", "Matches_Played": 8, "Substitution": 0, "Mins": 669, "Goals": 4, "xG": 1.97, "xG Per Avg Match": 0.28, "Shots": 13, "OnTarget": 5, "Shots Per Avg Match": 1.85, "On Target Per Avg Match": 0.71, "Year": 2020, "value": 5000000}, {"Country": "Italy", "League": "Serie A", "Club": "(ATA)", "Player Names": "luis muriel", "Matches_Played": 3, "Substitution": 4, "Mins": 264, "Goals": 4, "xG": 2.78, "xG Per Avg Match": 1.0, "Shots": 20, "OnTarget": 7, "Shots Per Avg Match": 7.2, "On Target Per Avg Match": 2.52, "Year": 2020, "value": 15000000}, {"Country": "Italy", "League": "Serie A", "Club": "(JUV)", "Player Names": "cristiano ronaldo", "Matches_Played": 5, "Substitution": 1, "Mins": 397, "Goals": 8, "xG": 5.31, "xG Per Avg Match": 1.27, "Shots": 26, "OnTarget": 13, "Shots Per Avg Match": 6.22, "On Target Per Avg Match": 3.11, "Year": 2020, "value": 60000000}, {"Country": "Italy", "League": "Serie A", "Club": "(INT)", "Player Names": "romelu lukaku", "Matches_Played": 6, "Substitution": 2, "Mins": 580, "Goals": 7, "xG": 7.27, "xG Per Avg Match": 1.19, "Shots": 22, "OnTarget": 10, "Shots Per Avg Match": 3.6, "On Target Per Avg Match": 1.64, "Year": 2020, "value": 68000000}, {"Country": "Italy", "League": "Serie A", "Club": "(NAP)", "Player Names": "dries mertens", "Matches_Played": 9, "Substitution": 0, "Mins": 616, "Goals": 4, "xG": 2.46, "xG Per Avg Match": 0.38, "Shots": 24, "OnTarget": 11, "Shots Per Avg Match": 3.7, "On Target Per Avg Match": 1.7, "Year": 2020, "value": 20000000}, {"Country": "Italy", "League": "Serie A", "Club": "(LAZ)", "Player Names": "ciro immobile", "Matches_Played": 6, "Substitution": 1, "Mins": 571, "Goals": 5, "xG": 3.73, "xG Per Avg Match": 0.62, "Shots": 22, "OnTarget": 8, "Shots Per Avg Match": 3.66, "On Target Per Avg Match": 1.33, "Year": 2020, "value": 40000000}, {"Country": "Italy", "League": "Serie A", "Club": "(SAM)", "Player Names": "fabio quagliarella", "Matches_Played": 8, "Substitution": 1, "Mins": 694, "Goals": 5, "xG": 4.46, "xG Per Avg Match": 0.61, "Shots": 23, "OnTarget": 9, "Shots Per Avg Match": 3.15, "On Target Per Avg Match": 1.23, "Year": 2020, "value": 1000000}, {"Country": "Italy", "League": "Serie A", "Club": "(ACM)", "Player Names": "zlatan ibrahimovic", "Matches_Played": 6, "Substitution": 0, "Mins": 557, "Goals": 10, "xG": 7.92, "xG Per Avg Match": 1.35, "Shots": 35, "OnTarget": 16, "Shots Per Avg Match": 5.97, "On Target Per Avg Match": 2.73, "Year": 2020, "value": 3500000}, {"Country": "Italy", "League": "Serie A", "Club": "(NAP)", "Player Names": "hirving lozano", "Matches_Played": 9, "Substitution": 0, "Mins": 568, "Goals": 4, "xG": 2.93, "xG Per Avg Match": 0.49, "Shots": 18, "OnTarget": 11, "Shots Per Avg Match": 3.01, "On Target Per Avg Match": 1.84, "Year": 2020, "value": 28000000}, {"Country": "Germany", "League": "Bundesliga", "Club": "(LEV)", "Player Names": "lucas alario", "Matches_Played": 6, "Substitution": 1, "Mins": 561, "Goals": 7, "xG": 3.07, "xG Per Avg Match": 0.52, "Shots": 20, "OnTarget": 11, "Shots Per Avg Match": 3.39, "On Target Per Avg Match": 1.86, "Year": 2020, "value": 13000000}, {"Country": "Germany", "League": "Bundesliga", "Club": "(FRA)", "Player Names": "bas dost", "Matches_Played": 8, "Substitution": 1, "Mins": 732, "Goals": 3, "xG": 3.24, "xG Per Avg Match": 0.42, "Shots": 14, "OnTarget": 8, "Shots Per Avg Match": 1.82, "On Target Per Avg Match": 1.04, "Year": 2020, "value": 5500000}, {"Country": "Germany", "League": "Bundesliga", "Club": "(BAY)", "Player Names": "serge gnabry", "Matches_Played": 7, "Substitution": 1, "Mins": 626, "Goals": 4, "xG": 1.58, "xG Per Avg Match": 0.24, "Shots": 18, "OnTarget": 9, "Shots Per Avg Match": 2.73, "On Target Per Avg Match": 1.37, "Year": 2020, "value": 72000000}, {"Country": "Germany", "League": "Bundesliga", "Club": "(WOB)", "Player Names": "wout weghorst", "Matches_Played": 8, "Substitution": 1, "Mins": 778, "Goals": 6, "xG": 5.57, "xG Per Avg Match": 0.68, "Shots": 25, "OnTarget": 14, "Shots Per Avg Match": 3.05, "On Target Per Avg Match": 1.71, "Year": 2020, "value": 21000000}, {"Country": "Germany", "League": "Bundesliga", "Club": "(RBL)", "Player Names": "dani olmo", "Matches_Played": 9, "Substitution": 0, "Mins": 834, "Goals": 4, "xG": 2.28, "xG Per Avg Match": 0.26, "Shots": 19, "OnTarget": 8, "Shots Per Avg Match": 2.16, "On Target Per Avg Match": 0.91, "Year": 2020, "value": 33000000}, {"Country": "Germany", "League": "Bundesliga", "Club": "(KOL)", "Player Names": "ellyes skhiri", "Matches_Played": 8, "Substitution": 0, "Mins": 709, "Goals": 3, "xG": 1.87, "xG Per Avg Match": 0.25, "Shots": 6, "OnTarget": 3, "Shots Per Avg Match": 0.8, "On Target Per Avg Match": 0.4, "Year": 2020, "value": 6000000}, {"Country": "Germany", "League": "Bundesliga", "Club": "(BMG)", "Player Names": "lars stindl", "Matches_Played": 7, "Substitution": 2, "Mins": 567, "Goals": 4, "xG": 3.52, "xG Per Avg Match": 0.59, "Shots": 19, "OnTarget": 9, "Shots Per Avg Match": 3.18, "On Target Per Avg Match": 1.51, "Year": 2020, "value": 6000000}, {"Country": "Germany", "League": "Bundesliga", "Club": "(FCA)", "Player Names": "daniel caligiuri", "Matches_Played": 9, "Substitution": 0, "Mins": 841, "Goals": 3, "xG": 0.8, "xG Per Avg Match": 0.09, "Shots": 11, "OnTarget": 5, "Shots Per Avg Match": 1.24, "On Target Per Avg Match": 0.56, "Year": 2020, "value": 4000000}, {"Country": "Germany", "League": "Bundesliga", "Club": "(DOR)", "Player Names": "erling haaland", "Matches_Played": 7, "Substitution": 1, "Mins": 683, "Goals": 10, "xG": 6.76, "xG Per Avg Match": 0.94, "Shots": 30, "OnTarget": 14, "Shots Per Avg Match": 4.17, "On Target Per Avg Match": 1.95, "Year": 2020, "value": 72000000}, {"Country": "Germany", "League": "Bundesliga", "Club": "(SCF)", "Player Names": "nils petersen", "Matches_Played": 6, "Substitution": 3, "Mins": 608, "Goals": 4, "xG": 2.11, "xG Per Avg Match": 0.33, "Shots": 15, "OnTarget": 7, "Shots Per Avg Match": 2.34, "On Target Per Avg Match": 1.09, "Year": 2020, "value": 6000000}, {"Country": "Germany", "League": "Bundesliga", "Club": "(BSC)", "Player Names": "matheus cunha", "Matches_Played": 9, "Substitution": 0, "Mins": 857, "Goals": 6, "xG": 3.43, "xG Per Avg Match": 0.38, "Shots": 26, "OnTarget": 15, "Shots Per Avg Match": 2.88, "On Target Per Avg Match": 1.66, "Year": 2020, "value": 13000000}, {"Country": "Germany", "League": "Bundesliga", "Club": "(BSC)", "Player Names": "matheus cunha", "Matches_Played": 9, "Substitution": 0, "Mins": 857, "Goals": 6, "xG": 3.43, "xG Per Avg Match": 0.38, "Shots": 26, "OnTarget": 15, "Shots Per Avg Match": 2.88, "On Target Per Avg Match": 1.66, "Year": 2020, "value": 13000000}, {"Country": "Germany", "League": "Bundesliga", "Club": "(BAY)", "Player Names": "robert lewandowski", "Matches_Played": 7, "Substitution": 1, "Mins": 672, "Goals": 12, "xG": 7.78, "xG Per Avg Match": 1.1, "Shots": 35, "OnTarget": 17, "Shots Per Avg Match": 4.95, "On Target Per Avg Match": 2.4, "Year": 2020, "value": 56000000}, {"Country": "France", "League": "France Ligue 18", "Club": "(NAN)", "Player Names": "ludovic blas", "Matches_Played": 11, "Substitution": 1, "Mins": 990, "Goals": 4, "xG": 1.88, "xG Per Avg Match": 0.18, "Shots": 19, "OnTarget": 7, "Shots Per Avg Match": 1.82, "On Target Per Avg Match": 0.67, "Year": 2020, "value": 8000000}, {"Country": "France", "League": "France Ligue 10", "Club": "(MON)", "Player Names": "kevin volland", "Matches_Played": 9, "Substitution": 1, "Mins": 709, "Goals": 5, "xG": 3.43, "xG Per Avg Match": 0.46, "Shots": 12, "OnTarget": 11, "Shots Per Avg Match": 1.61, "On Target Per Avg Match": 1.47, "Year": 2020, "value": 28000000}, {"Country": "France", "League": "France Ligue 3", "Club": "(MPE)", "Player Names": "andy delort", "Matches_Played": 11, "Substitution": 0, "Mins": 902, "Goals": 6, "xG": 4.18, "xG Per Avg Match": 0.44, "Shots": 31, "OnTarget": 14, "Shots Per Avg Match": 3.26, "On Target Per Avg Match": 1.47, "Year": 2020, "value": 10000000}, {"Country": "France", "League": "France Ligue 5", "Club": "(MET)", "Player Names": "ibrahima niane", "Matches_Played": 6, "Substitution": 0, "Mins": 482, "Goals": 6, "xG": 3.45, "xG Per Avg Match": 0.68, "Shots": 21, "OnTarget": 9, "Shots Per Avg Match": 4.14, "On Target Per Avg Match": 1.77, "Year": 2020, "value": 3000000}, {"Country": "France", "League": "France Ligue 2", "Club": "(REI)", "Player Names": "boulaye dia", "Matches_Played": 9, "Substitution": 1, "Mins": 772, "Goals": 8, "xG": 5.28, "xG Per Avg Match": 0.65, "Shots": 25, "OnTarget": 12, "Shots Per Avg Match": 3.08, "On Target Per Avg Match": 1.48, "Year": 2020, "value": 4000000}, {"Country": "France", "League": "France Ligue 20", "Club": "(PSG)", "Player Names": "moise kean", "Matches_Played": 6, "Substitution": 0, "Mins": 454, "Goals": 4, "xG": 3.2, "xG Per Avg Match": 0.67, "Shots": 14, "OnTarget": 5, "Shots Per Avg Match": 2.93, "On Target Per Avg Match": 1.05, "Year": 2020, "value": 25000000}, {"Country": "France", "League": "France Ligue 15", "Club": "(LEN)", "Player Names": "ignatius ganago", "Matches_Played": 6, "Substitution": 3, "Mins": 452, "Goals": 4, "xG": 3.33, "xG Per Avg Match": 0.7, "Shots": 14, "OnTarget": 7, "Shots Per Avg Match": 2.94, "On Target Per Avg Match": 1.47, "Year": 2020, "value": 3000000}, {"Country": "France", "League": "France Ligue 8", "Club": "(BRE)", "Player Names": "irvin cardona", "Matches_Played": 6, "Substitution": 5, "Mins": 627, "Goals": 5, "xG": 2.71, "xG Per Avg Match": 0.41, "Shots": 21, "OnTarget": 8, "Shots Per Avg Match": 3.18, "On Target Per Avg Match": 1.21, "Year": 2020, "value": 4000000}, {"Country": "France", "League": "France Ligue 14", "Club": "(MAR)", "Player Names": "florian thauvin", "Matches_Played": 10, "Substitution": 0, "Mins": 835, "Goals": 4, "xG": 2.99, "xG Per Avg Match": 0.34, "Shots": 21, "OnTarget": 8, "Shots Per Avg Match": 2.39, "On Target Per Avg Match": 0.91, "Year": 2020, "value": 32000000}, {"Country": "France", "League": "France Ligue 13", "Club": "(NIC)", "Player Names": "amine gouiri", "Matches_Played": 9, "Substitution": 2, "Mins": 903, "Goals": 4, "xG": 3.33, "xG Per Avg Match": 0.35, "Shots": 26, "OnTarget": 10, "Shots Per Avg Match": 2.74, "On Target Per Avg Match": 1.05, "Year": 2020, "value": 4000000}, {"Country": "France", "League": "France Ligue 16", "Club": "(LIL)", "Player Names": "jonathan bamba", "Matches_Played": 11, "Substitution": 1, "Mins": 1061, "Goals": 4, "xG": 1.68, "xG Per Avg Match": 0.15, "Shots": 25, "OnTarget": 9, "Shots Per Avg Match": 2.24, "On Target Per Avg Match": 0.81, "Year": 2020, "value": 16000000}, {"Country": "France", "League": "France Ligue 17", "Club": "(STR)", "Player Names": "ludovic ajorque", "Matches_Played": 11, "Substitution": 0, "Mins": 1008, "Goals": 4, "xG": 3.61, "xG Per Avg Match": 0.34, "Shots": 17, "OnTarget": 8, "Shots Per Avg Match": 1.6, "On Target Per Avg Match": 0.75, "Year": 2020, "value": 6000000}, {"Country": "France", "League": "France Ligue 11", "Club": "(LYO)", "Player Names": "memphis depay", "Matches_Played": 9, "Substitution": 3, "Mins": 903, "Goals": 5, "xG": 4.75, "xG Per Avg Match": 0.5, "Shots": 30, "OnTarget": 10, "Shots Per Avg Match": 3.16, "On Target Per Avg Match": 1.05, "Year": 2020, "value": 44000000}, {"Country": "England", "League": "Premier League", "Club": "(MNU)", "Player Names": "bruno fernandes", "Matches_Played": 9, "Substitution": 0, "Mins": 809, "Goals": 7, "xG": 5.45, "xG Per Avg Match": 0.64, "Shots": 30, "OnTarget": 14, "Shots Per Avg Match": 3.52, "On Target Per Avg Match": 1.64, "Year": 2020, "value": 48000000}, {"Country": "England", "League": "Premier League", "Club": "(CHE)", "Player Names": "timo werner", "Matches_Played": 10, "Substitution": 0, "Mins": 876, "Goals": 4, "xG": 3.69, "xG Per Avg Match": 0.4, "Shots": 23, "OnTarget": 10, "Shots Per Avg Match": 2.49, "On Target Per Avg Match": 1.08, "Year": 2020, "value": 64000000}, {"Country": "England", "League": "Premier League", "Club": "(NEW)", "Player Names": "callum wilson", "Matches_Played": 9, "Substitution": 0, "Mins": 835, "Goals": 7, "xG": 6.5, "xG Per Avg Match": 0.74, "Shots": 18, "OnTarget": 8, "Shots Per Avg Match": 2.05, "On Target Per Avg Match": 0.91, "Year": 2020, "value": 24000000}, {"Country": "England", "League": "Premier League", "Club": "(LIV)", "Player Names": "diogo jota", "Matches_Played": 5, "Substitution": 3, "Mins": 530, "Goals": 5, "xG": 2.51, "xG Per Avg Match": 0.45, "Shots": 20, "OnTarget": 11, "Shots Per Avg Match": 3.58, "On Target Per Avg Match": 1.97, "Year": 2020, "value": 40000000}, {"Country": "England", "League": "Premier League", "Club": "(CRY)", "Player Names": "wilfried zaha", "Matches_Played": 8, "Substitution": 0, "Mins": 779, "Goals": 5, "xG": 4.35, "xG Per Avg Match": 0.53, "Shots": 18, "OnTarget": 7, "Shots Per Avg Match": 2.2, "On Target Per Avg Match": 0.85, "Year": 2020, "value": 44000000}, {"Country": "England", "League": "Premier League", "Club": "(AVL)", "Player Names": "jack grealish", "Matches_Played": 9, "Substitution": 0, "Mins": 872, "Goals": 5, "xG": 2.85, "xG Per Avg Match": 0.31, "Shots": 26, "OnTarget": 9, "Shots Per Avg Match": 2.83, "On Target Per Avg Match": 0.98, "Year": 2020, "value": 30000000}, {"Country": "England", "League": "Premier League", "Club": "(WHU)", "Player Names": "jarrod bowen", "Matches_Played": 10, "Substitution": 0, "Mins": 845, "Goals": 4, "xG": 2.94, "xG Per Avg Match": 0.33, "Shots": 22, "OnTarget": 5, "Shots Per Avg Match": 2.47, "On Target Per Avg Match": 0.56, "Year": 2020, "value": 16000000}, {"Country": "England", "League": "Premier League", "Club": "(LIV)", "Player Names": "mohamed salah", "Matches_Played": 9, "Substitution": 0, "Mins": 831, "Goals": 8, "xG": 6.12, "xG Per Avg Match": 0.7, "Shots": 35, "OnTarget": 15, "Shots Per Avg Match": 4.0, "On Target Per Avg Match": 1.71, "Year": 2020, "value": 120000000}, {"Country": "England", "League": "Premier League", "Club": "(LEI)", "Player Names": "jamie vardy", "Matches_Played": 8, "Substitution": 1, "Mins": 780, "Goals": 8, "xG": 8.7, "xG Per Avg Match": 1.06, "Shots": 21, "OnTarget": 15, "Shots Per Avg Match": 2.56, "On Target Per Avg Match": 1.83, "Year": 2020, "value": 16000000}, {"Country": "England", "League": "Premier League", "Club": "(TOT)", "Player Names": "harry kane", "Matches_Played": 10, "Substitution": 0, "Mins": 956, "Goals": 7, "xG": 6.64, "xG Per Avg Match": 0.66, "Shots": 39, "OnTarget": 15, "Shots Per Avg Match": 3.88, "On Target Per Avg Match": 1.49, "Year": 2020, "value": 120000000}, {"Country": "England", "League": "Premier League", "Club": null, "Player Names": "danny ings", "Matches_Played": 7, "Substitution": 0, "Mins": 662, "Goals": 5, "xG": 2.58, "xG Per Avg Match": 0.37, "Shots": 15, "OnTarget": 9, "Shots Per Avg Match": 2.15, "On Target Per Avg Match": 1.29, "Year": 2020, "value": 17000000}, {"Country": "England", "League": "Premier League", "Club": "(BHA)", "Player Names": "neal maupay", "Matches_Played": 9, "Substitution": 0, "Mins": 786, "Goals": 4, "xG": 6.54, "xG Per Avg Match": 0.79, "Shots": 25, "OnTarget": 11, "Shots Per Avg Match": 3.02, "On Target Per Avg Match": 1.33, "Year": 2020, "value": 17000000}, {"Country": "England", "League": "Premier League", "Club": "(MNC)", "Player Names": "riyad mahrez", "Matches_Played": 7, "Substitution": 0, "Mins": 612, "Goals": 4, "xG": 1.93, "xG Per Avg Match": 0.3, "Shots": 21, "OnTarget": 10, "Shots Per Avg Match": 3.26, "On Target Per Avg Match": 1.55, "Year": 2020, "value": 48000000}, {"Country": "Brazil", "League": "Campeonato Brasileiro SÃ©rie A", "Club": "(FLA)", "Player Names": "pedro", "Matches_Played": 12, "Substitution": 6, "Mins": 1207, "Goals": 10, "xG": 10.42, "xG Per Avg Match": 0.82, "Shots": 46, "OnTarget": 25, "Shots Per Avg Match": 3.62, "On Target Per Avg Match": 1.97, "Year": 2020, "value": 7500000}, {"Country": "Brazil", "League": "Campeonato Brasileiro SÃ©rie A", "Club": "(FLA)", "Player Names": "pedro", "Matches_Played": 12, "Substitution": 6, "Mins": 1207, "Goals": 10, "xG": 10.42, "xG Per Avg Match": 0.82, "Shots": 46, "OnTarget": 25, "Shots Per Avg Match": 3.62, "On Target Per Avg Match": 1.97, "Year": 2020, "value": 12000000}];
-const ALL_COLS = ["Country", "League", "Club", "Player Names", "Matches_Played", "Substitution", "Mins", "Goals", "xG", "xG Per Avg Match", "Shots", "OnTarget", "Shots Per Avg Match", "On Target Per Avg Match", "Year", "value"];
-const NUMERIC_COLS = ["Matches_Played", "Substitution", "Mins", "Goals", "xG", "xG Per Avg Match", "Shots", "OnTarget", "Shots Per Avg Match", "On Target Per Avg Match", "Year", "value"];
-const LEAGUES = ["Bundesliga", "Campeonato Brasileiro SÃ©rie A", "Eredivisie", "France Ligue 10", "France Ligue 11", "France Ligue 12", "France Ligue 13", "France Ligue 14", "France Ligue 15", "France Ligue 16", "France Ligue 17", "France Ligue 18", "France Ligue 19", "France Ligue 2", "France Ligue 20", "France Ligue 3", "France Ligue 4", "France Ligue 5", "France Ligue 6", "France Ligue 7", "France Ligue 8", "France Ligue 9", "La Liga", "MLS", "Premier League", "Primeira Liga", "Serie A"];
-const COL_PLAYER = "Player Names";
-const COL_MARKET = "value";
-const COL_GOALS = "Goals";
-const COL_SHOTS = "Shots";
-const COL_LEAGUE = "League";
+// Configuration
+let DATA = [];
+let LEAGUES = [];
+let NUMERIC_COLS = [];
+let ALL_COLS = [];
+let COL_LEAGUE = '';
+let COL_PLAYER = '';
+let COL_MARKET = '';
+let COL_GOALS = '';
 
-function safeNum(v){ const n=Number(v); return (v===null||v===undefined||v==="")?null:(isNaN(n)?null:n); }
-function pearson(xs, ys){
-  if(!xs||!ys||xs.length!==ys.length||xs.length<2) return null;
-  const n=xs.length; const mx=xs.reduce((a,b)=>a+b,0)/n; const my=ys.reduce((a,b)=>a+b,0)/n;
-  let num=0,sx=0,sy=0;
-  for(let i=0;i<n;i++){ num+=(xs[i]-mx)*(ys[i]-my); sx+=(xs[i]-mx)**2; sy+=(ys[i]-my)**2; }
-  const den=Math.sqrt(sx*sy); if(den===0) return 0; return num/den;
-}
-
+// DOM Elements
 const leagueSel = document.getElementById('leagueSelect');
 const xSel = document.getElementById('xSelect');
 const ySel = document.getElementById('ySelect');
@@ -130,147 +634,554 @@ const applyBtn = document.getElementById('applyBtn');
 const resetBtn = document.getElementById('resetBtn');
 const sameVarDisclaimer = document.getElementById('sameVarDisclaimer');
 
-function populateControls(){
-  leagueSel.innerHTML = "<option>Semua Liga</option>";
-  LEAGUES.forEach(l => { const o=document.createElement('option'); o.value=o.text=l; leagueSel.appendChild(o); });
-  xSel.innerHTML = ""; ySel.innerHTML = "";
-  ALL_COLS.forEach(c => { const ox=document.createElement('option'); ox.value=ox.text=c; xSel.appendChild(ox); const oy=document.createElement('option'); oy.value=oy.text=c; ySel.appendChild(oy); });
-  if(ALL_COLS.includes(COL_MARKET)) xSel.value = COL_MARKET;
-  if(ALL_COLS.includes(COL_GOALS)) ySel.value = COL_GOALS;
+// Parse CSV
+function parseCSV(text) {
+  const lines = text.trim().split('\n');
+  if (lines.length < 2) return [];
+  
+  const headers = lines[0].split(',').map(h => h.trim().replace(/^"|"$/g, ''));
+  const rows = [];
+  
+  for (let i = 1; i < lines.length; i++) {
+    const values = lines[i].split(',');
+    const row = {};
+    headers.forEach((h, idx) => {
+      row[h] = values[idx] ? values[idx].trim().replace(/^"|"$/g, '') : '';
+    });
+    rows.push(row);
+  }
+  
+  return rows;
 }
-populateControls();
 
-function getFiltered(){
+// Detect columns
+function detectColumns(data) {
+  if (data.length === 0) return;
+  
+  const sample = data[0];
+  ALL_COLS = Object.keys(sample);
+  
+  // Detect numeric columns
+  NUMERIC_COLS = ALL_COLS.filter(col => {
+    const vals = data.slice(0, 100).map(r => parseFloat(r[col]));
+    return vals.filter(v => !isNaN(v) && v !== null).length > 50;
+  });
+  
+  // Detect special columns
+  COL_LEAGUE = ALL_COLS.find(c => /league|liga/i.test(c)) || '';
+  COL_PLAYER = ALL_COLS.find(c => /player|name|pemain/i.test(c)) || '';
+  COL_MARKET = ALL_COLS.find(c => /market|value|nilai/i.test(c)) || NUMERIC_COLS[0] || '';
+  COL_GOALS = ALL_COLS.find(c => /goal|gol/i.test(c)) || NUMERIC_COLS[1] || '';
+  
+  // Extract unique leagues
+  if (COL_LEAGUE) {
+    LEAGUES = [...new Set(data.map(r => r[COL_LEAGUE]).filter(Boolean))].sort();
+  }
+}
+
+// Initialize
+function init() {
+  // Load CSV from external file
+  fetch('cleaned_data.csv')
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('File cleaned_data.csv tidak ditemukan. Pastikan file ada di folder yang sama dengan dashboard.html');
+      }
+      return response.text();
+    })
+    .then(csvText => {
+      DATA = parseCSV(csvText);
+      if (DATA.length === 0) {
+        throw new Error('Data CSV kosong atau format salah');
+      }
+      detectColumns(DATA);
+      populateControls();
+      renderAll();
+    })
+    .catch(error => {
+      document.querySelector('.container').innerHTML = `
+        <div class="glass-card" style="text-align: center; padding: 60px;">
+          <h2 style="color: var(--accent-orange); margin-bottom: 20px;">⚠️ Error Loading Data</h2>
+          <p style="color: var(--text-secondary); max-width: 600px; margin: 0 auto; line-height: 1.8;">
+            ${error.message}
+          </p>
+          <p style="color: var(--text-secondary); margin-top: 20px;">
+            Pastikan file <code style="background: rgba(255,255,255,0.1); padding: 4px 8px; border-radius: 4px;">cleaned_data.csv</code> 
+            berada di folder yang sama dengan dashboard.html
+          </p>
+        </div>
+      `;
+    });
+}
+
+// Utility functions
+function safeNum(val) {
+  const n = parseFloat(val);
+  return isNaN(n) ? null : n;
+}
+
+function pearson(xs, ys) {
+  const n = xs.length;
+  if (n === 0) return 0;
+  
+  const mx = xs.reduce((a, b) => a + b, 0) / n;
+  const my = ys.reduce((a, b) => a + b, 0) / n;
+  
+  let num = 0, dx2 = 0, dy2 = 0;
+  for (let i = 0; i < n; i++) {
+    const dx = xs[i] - mx;
+    const dy = ys[i] - my;
+    num += dx * dy;
+    dx2 += dx * dx;
+    dy2 += dy * dy;
+  }
+  
+  return dx2 === 0 || dy2 === 0 ? 0 : num / Math.sqrt(dx2 * dy2);
+}
+
+function quantile(arr, q) {
+  const sorted = arr.slice().sort((a, b) => a - b);
+  const pos = (sorted.length - 1) * q;
+  const base = Math.floor(pos);
+  const rest = pos - base;
+  
+  if (sorted[base + 1] !== undefined) {
+    return sorted[base] + rest * (sorted[base + 1] - sorted[base]);
+  }
+  return sorted[base];
+}
+
+function getFiltered() {
   const league = leagueSel.value;
-  if(league && league!=='Semua Liga' && COL_LEAGUE !== null) return DATA.filter(r=>r[COL_LEAGUE]===league);
-  return [...DATA];
+  if (league === 'Semua Liga') return DATA;
+  return DATA.filter(r => r[COL_LEAGUE] === league);
 }
 
-function renderExec(filtered){
-  const el = document.getElementById('execText');
-  const totalAll = DATA.length;
-  const leagueText = leagueSel.value==='Semua Liga' ? 'seluruh liga' : leagueSel.value;
-  el.innerHTML = `Dashboard ini menampilkan eksplorasi data terhadap <b>${totalAll}</b> pemain sepak bola profesional. Saat ini menampilkan <b>${filtered.length}</b> pemain dari <b>${leagueText}</b>.<br><br>
-Analisis memungkinkan pengguna melihat keterkaitan antara atribut performa (mis. goals, shots, age) dengan market value. Visualisasi: scatter plot, bar chart (top 10), box plot, heatmap (korelasi), dan pie chart (distribusi liga). Gunakan filter dan pilih variabel X & Y untuk menyesuaikan analisis.`;
+// Render functions
+function renderExec(filtered) {
+  const total = filtered.length;
+  const leagues = COL_LEAGUE ? new Set(filtered.map(r => r[COL_LEAGUE])).size : 0;
+  
+  let text = `Dataset saat ini menampilkan <strong>${total}</strong> pemain`;
+  if (leagues > 1) text += ` dari <strong>${leagues}</strong> liga`;
+  text += `. Gunakan kontrol di atas untuk menyesuaikan analisis berdasarkan liga atau variabel spesifik.`;
+  
+  document.getElementById('execText').innerHTML = text;
 }
 
-function renderKPI(filtered){
+function renderKPI(filtered) {
   const area = document.getElementById('kpiArea');
-  let avgMarket='N/A', avgGoals='N/A', avgShots='N/A';
-  if(COL_MARKET!==null){
-    const arr = filtered.map(r=>safeNum(r[COL_MARKET])).filter(v=>v!==null);
-    if(arr.length) avgMarket = Math.round((arr.reduce((a,b)=>a+b,0)/arr.length)*100)/100;
-  }
-  if(COL_GOALS!==null){
-    const arr = filtered.map(r=>safeNum(r[COL_GOALS])).filter(v=>v!==null);
-    if(arr.length) avgGoals = (arr.reduce((a,b)=>a+b,0)/arr.length).toFixed(2);
-  }
-  if(COL_SHOTS!==null){
-    const arr = filtered.map(r=>safeNum(r[COL_SHOTS])).filter(v=>v!==null);
-    if(arr.length) avgShots = (arr.reduce((a,b)=>a+b,0)/arr.length).toFixed(2);
-  }
-  area.innerHTML = `<table class="kpi-table">
-    <tr><th>Indikator</th><th>Nilai</th></tr>
-    <tr><td>Rata-rata Market Value (€)</td><td>${avgMarket}</td></tr>
-    <tr><td>Rata-rata Goals</td><td>${avgGoals}</td></tr>
-    <tr><td>Rata-rata Shots</td><td>${avgShots}</td></tr>
-    <tr><td>Total Pemain</td><td>${filtered.length}</td></tr>
-  </table>`;
+  
+  const total = filtered.length;
+  const avgMarket = COL_MARKET ? 
+    filtered.map(r => safeNum(r[COL_MARKET])).filter(v => v !== null).reduce((a, b) => a + b, 0) / 
+    filtered.map(r => safeNum(r[COL_MARKET])).filter(v => v !== null).length : 0;
+  const avgGoals = COL_GOALS ?
+    filtered.map(r => safeNum(r[COL_GOALS])).filter(v => v !== null).reduce((a, b) => a + b, 0) /
+    filtered.map(r => safeNum(r[COL_GOALS])).filter(v => v !== null).length : 0;
+  const leagues = COL_LEAGUE ? new Set(filtered.map(r => r[COL_LEAGUE])).size : 0;
+  
+  area.innerHTML = `
+    <div class="kpi-item">
+      <div class="kpi-label">Total Players</div>
+      <div class="kpi-value">${total}</div>
+    </div>
+    <div class="kpi-item">
+      <div class="kpi-label">Avg Market Value</div>
+      <div class="kpi-value">${(avgMarket / 1e6).toFixed(1)}M</div>
+    </div>
+    <div class="kpi-item">
+      <div class="kpi-label">Avg Goals</div>
+      <div class="kpi-value">${avgGoals.toFixed(1)}</div>
+    </div>
+    <div class="kpi-item">
+      <div class="kpi-label">Leagues</div>
+      <div class="kpi-value">${leagues}</div>
+    </div>
+  `;
 }
 
-function renderPie(filtered){
+function renderPie(filtered) {
+  if (!COL_LEAGUE) {
+    document.getElementById('pie').innerHTML = '<div style="padding:40px;text-align:center;color:var(--text-secondary);">Liga column not found</div>';
+    return;
+  }
+  
   const counts = {};
-  filtered.forEach(r=>{ const k = COL_LEAGUE ? (r[COL_LEAGUE]||"Unknown") : "Unknown"; counts[k]=(counts[k]||0)+1; });
-  const labels = Object.keys(counts); const values = labels.map(l=>counts[l]);
-  Plotly.newPlot('pie', [{labels:labels, values:values, type:'pie', textinfo:'label+percent'}], {height:480, title:'Distribusi Pemain per Liga'}, {responsive:true});
-  document.getElementById('pieInterp').innerText = `Grafik pie ini memperlihatkan bahwa distribusi pemain antar liga ${labels.length? 'memiliki proporsi: '+labels.map((l,i)=> l+' ('+values[i]+')').join(', '):'tidak tersedia'}. Jika satu liga mendominasi, dataset lebih fokus pada liga tersebut; sebaran seimbang menandakan data lebih representatif antar liga.`;
+  filtered.forEach(r => {
+    const league = r[COL_LEAGUE] || 'Unknown';
+    counts[league] = (counts[league] || 0) + 1;
+  });
+  
+  const labels = Object.keys(counts);
+  const values = Object.values(counts);
+  const colors = ['#00ff88', '#00d4ff', '#b400ff', '#ff6b00', '#ff0080', '#ffcc00'];
+  
+  const data = [{
+    labels: labels,
+    values: values,
+    type: 'pie',
+    hole: 0.4,
+    marker: {
+      colors: colors,
+      line: { color: '#0a0e1a', width: 2 }
+    },
+    textinfo: 'label+percent',
+    textfont: { size: 14, color: '#ffffff' }
+  }];
+  
+  const layout = {
+    height: 450,
+    paper_bgcolor: 'rgba(0,0,0,0)',
+    plot_bgcolor: 'rgba(0,0,0,0)',
+    font: { color: '#ffffff', family: 'DM Sans' },
+    showlegend: true,
+    legend: { orientation: 'h', y: -0.1 }
+  };
+  
+  Plotly.newPlot('pie', data, layout, { responsive: true });
+  
+  document.getElementById('pieInterp').innerText = 
+    `Distribusi pemain menunjukkan bahwa ${labels[0]} memiliki representasi terbesar dengan ${values[0]} pemain (${(values[0]/filtered.length*100).toFixed(1)}%). Ini memberikan gambaran tentang keseimbangan data antar liga.`;
 }
 
-function renderBar(filtered){
+function renderBar(filtered) {
   const area = document.getElementById('bar');
-  if(COL_MARKET===null || COL_PLAYER===null){ area.innerHTML = "<div style='padding:12px;color:#b00;'>Kolom nama pemain atau market value tidak ditemukan.</div>"; document.getElementById('barInterp').innerText=''; return; }
-  const map = {};
-  filtered.forEach(r=>{ const name = r[COL_PLAYER]||"Unknown"; const val = safeNum(r[COL_MARKET]); if(val!==null){ if(!map[name]||val>map[name]) map[name]=val;} });
-  const items = Object.keys(map).map(k=>({name:k,val:map[k]})).sort((a,b)=>b.val-a.val).slice(0,10);
-  if(items.length===0){ area.innerHTML = "<div style='padding:12px;color:#b00;'>Tidak ada data market value untuk Top 10.</div>"; document.getElementById('barInterp').innerText=''; return; }
-  const trace = { x: items.map(i=>i.name).reverse(), y: items.map(i=>i.val).reverse(), type:'bar', text: items.map(i=>(i.val/1e6).toFixed(1)+'M'), textposition:'outside', marker:{color: items.map((_,i)=>['#2b8cbe','#66c2a5','#fc8d62','#8da0cb','#e78ac3'][i%5])} };
-  Plotly.newPlot('bar', [trace], {height:480, title:'Top 10 Pemain Berdasarkan Market Value'}, {responsive:true});
-  document.getElementById('barInterp').innerText = `Grafik batang ini memperlihatkan bahwa pemain dengan market value tertinggi cenderung terfokus pada beberapa nama; perbandingan ini membantu mengidentifikasi gap nilai antar pemain bintang dan pemain lainnya.`;
-}
-
-function renderScatter(filtered){
-  const x = xSel.value, y = ySel.value; const interp = document.getElementById('scatterInterp');
-  if(x===y){ sameVarDisclaimer.style.display='block'; sameVarDisclaimer.innerText = `Jika kamu memilih variabel yang sama (misalnya: ${x}), scatter plot akan menjadi garis lurus karena kedua sumbu identik.`; }
-  else { sameVarDisclaimer.style.display='none'; }
-  if(!(NUMERIC_COLS.includes(x) && NUMERIC_COLS.includes(y))){ document.getElementById('scatter').innerHTML = "<div style='padding:12px;color:#b00;'>Scatter plot hanya dapat dibuat jika kedua variabel numerik.</div>"; interp.innerText=""; return; }
-  const groups = {}; filtered.forEach(r=>{ const lg = COL_LEAGUE? (r[COL_LEAGUE]||"Unknown") : "Unknown"; const xv=safeNum(r[x]); const yv=safeNum(r[y]); if(xv!==null&&yv!==null){ if(!groups[lg]) groups[lg]=[]; groups[lg].push({x:xv,y:yv,text:r[COL_PLAYER]||""}); } });
-  const traces=[]; Object.entries(groups).forEach(([lg,pts],idx)=>{ traces.push({ x: pts.map(p=>p.x), y: pts.map(p=>p.y), mode:'markers', type:'scatter', name: lg, text: pts.map(p=>p.text), marker:{size:8} }); });
-  Plotly.newPlot('scatter', traces, {height:480, title:`Hubungan antara ${x} dan ${y}`, xaxis:{title:x}, yaxis:{title:y}}, {responsive:true});
-  const xs=[], ys=[]; filtered.forEach(r=>{ const xv=safeNum(r[x]); const yv=safeNum(r[y]); if(xv!==null&&yv!==null){ xs.push(xv); ys.push(yv);} });
-  if(xs.length>1){ const c = pearson(xs, ys); interp.innerText = `Nilai korelasi Pearson antara ${x} dan ${y} adalah ${c.toFixed(2)}.`; }
-  else { interp.innerText = "Tidak cukup data numerik untuk menghitung korelasi."; }
-  // paragraph interpretation (dynamic)
-  let para = `Grafik scatter ini memperlihatkan bahwa hubungan antara ${x} dan ${y} `;
-  if(xs.length>1){
-    const c = pearson(xs, ys);
-    if(Math.abs(c) >= 0.7) para += `termasuk kuat (korelasi Pearson ${c.toFixed(2)}). Secara umum, pola titik menunjukkan hubungan yang konsisten antara kedua variabel.`;
-    else if(Math.abs(c) >= 0.3) para += `termasuk sedang (korelasi Pearson ${c.toFixed(2)}). Ada kecenderungan pola yang dapat dijelaskan tetapi juga variasi.`;
-    else para += `termasuk lemah atau tidak signifikan (korelasi Pearson ${c.toFixed(2)}); titik-titik lebih tersebar, menandakan sedikit hubungan linier antara keduanya.`;
-  } else {
-    para += "tidak cukup data untuk analisis detail.";
+  
+  if (!COL_MARKET || !COL_PLAYER) {
+    area.innerHTML = '<div style="padding:40px;text-align:center;color:var(--text-secondary);">Market value or player column not found</div>';
+    return;
   }
-  interp.innerText += "\n\n" + para;
-}
-
-function renderBox(filtered){
-  const y = ySel.value; const area = document.getElementById('box'); const interp = document.getElementById('boxInterp');
-  if(!NUMERIC_COLS.includes(y)){ area.innerHTML = "<div style='padding:12px;color:#b00;'>Boxplot hanya dapat dibuat untuk variabel numerik (Y).</div>"; interp.innerText=""; return; }
-  const arr = filtered.map(r=>safeNum(r[y])).filter(v=>v!==null);
-  if(arr.length===0){ area.innerHTML = "<div style='padding:12px;color:#b00;'>Tidak ada data numerik untuk boxplot.</div>"; interp.innerText=""; return; }
-  Plotly.newPlot('box', [{y:arr,type:'box',boxpoints:'outliers',marker:{color:'#8a2be2'}}], {height:480, title:`Distribusi ${y}`}, {responsive:true});
-  const q1 = quantile(arr,0.25), q3 = quantile(arr,0.75), med = quantile(arr,0.5);
-  interp.innerText = `Grafik boxplot ini memperlihatkan bahwa distribusi ${y} memiliki median ${med.toFixed(2)}, rentang interkuartil (Q1–Q3) dari ${q1.toFixed(2)} sampai ${q3.toFixed(2)}. Titik di luar rentang menandakan outlier yang mungkin merupakan kasus ekstrem atau data yang perlu ditinjau.`;
-}
-
-function renderHeat(filtered){
-  if(NUMERIC_COLS.length===0){ document.getElementById('heat').innerHTML="<div style='padding:12px;color:#b00;'>Tidak ada kolom numerik untuk heatmap.</div>"; document.getElementById('heatInterp').innerText=""; return; }
-  const cols = NUMERIC_COLS.slice(); const n = cols.length; const z = Array.from({length:n}, ()=>Array(n).fill(0));
-  for(let i=0;i<n;i++){ for(let j=0;j<n;j++){
-    const pairedX=[], pairedY=[];
-    filtered.forEach(r=>{ const a=safeNum(r[cols[i]]); const b=safeNum(r[cols[j]]); if(a!==null&&b!==null){ pairedX.push(a); pairedY.push(b); } });
-    z[i][j] = pairedX.length>1 ? pearson(pairedX, pairedY) : 0;
-  } }
-  const annotations=[]; for(let i=0;i<n;i++){ for(let j=0;j<n;j++){ annotations.push({ x:cols[j], y:cols[i], text: z[i][j].toFixed(2), showarrow:false, font:{color: Math.abs(z[i][j])>0.5? 'white':'black', size:11} }); } }
-  const data=[{ z:z.map(row=>row.map(v=>Number(v.toFixed(2)))), x:cols, y:cols, type:'heatmap', colorscale:'RdBu', zmin:-1, zmax:1 }];
-  const layout={height:520, title:'Korelasi antar Variabel Numerik', annotations:annotations, margin:{l:140, r:40, t:80, b:140}};
-  Plotly.newPlot('heat', data, layout, {responsive:true});
-  document.getElementById('heatInterp').innerText = "Grafik heatmap ini memperlihatkan angka korelasi Pearson antar kolom numerik. Nilai mendekati 1 menunjukkan korelasi positif kuat; mendekati -1 menunjukkan korelasi negatif kuat; nilai dekat 0 menunjukkan tidak ada korelasi linear yang jelas.";
-}
-
-function renderAnalysis(filtered){
-  const x = xSel.value, y = ySel.value; const el = document.getElementById('analysisText');
-  let text = "";
-  if(x===y){
-    text += `Catatan: Kamu memilih variabel yang sama (${x}). Scatter plot akan menjadi garis diagonal — ini tidak memberi insight korelasi karena X selalu sama dengan Y.`;
-  } else if(NUMERIC_COLS.includes(x) && NUMERIC_COLS.includes(y)){
-    const xs=[], ys=[]; filtered.forEach(r=>{ const a=safeNum(r[x]); const b=safeNum(r[y]); if(a!==null&&b!==null){ xs.push(a); ys.push(b); } });
-    if(xs.length>1){
-      const c = pearson(xs, ys); const arah = c>0? 'searah (positif)' : (c<0? 'berlawanan arah (negatif)': 'tidak signifikan');
-      text += `Berdasarkan analisis korelasi, terdapat nilai Pearson ${c.toFixed(2)} antara ${x} dan ${y}, yang menunjukkan hubungan ${arah}. Korelasi ini membantu menjelaskan seberapa besar perubahan pada ${x} berasosiasi dengan perubahan pada ${y}.`;
-    } else text += "Tidak cukup data numerik untuk analisis korelasi yang kuat.";
-  } else {
-    text += `Variabel ${x} dan ${y} tidak keduanya numerik, sehingga analisis korelasi numerik tidak tersedia. Gunakan kombinasi visual kategorikal atau distribusi untuk memahami pola.`;
+  
+  const items = filtered
+    .map(r => ({ name: r[COL_PLAYER], val: safeNum(r[COL_MARKET]) }))
+    .filter(i => i.val !== null)
+    .sort((a, b) => b.val - a.val)
+    .slice(0, 10);
+  
+  if (items.length === 0) {
+    area.innerHTML = '<div style="padding:40px;text-align:center;color:var(--text-secondary);">No market value data available</div>';
+    return;
   }
+  
+  const trace = {
+    x: items.map(i => i.name).reverse(),
+    y: items.map(i => i.val).reverse(),
+    type: 'bar',
+    text: items.map(i => (i.val / 1e6).toFixed(1) + 'M'),
+    textposition: 'outside',
+    marker: {
+      color: items.map((_, i) => ['#00ff88', '#00d4ff', '#b400ff', '#ff6b00', '#ff0080'][i % 5]),
+      line: { color: '#0a0e1a', width: 2 }
+    }
+  };
+  
+  const layout = {
+    height: 450,
+    paper_bgcolor: 'rgba(0,0,0,0)',
+    plot_bgcolor: 'rgba(0,0,0,0)',
+    font: { color: '#ffffff', family: 'DM Sans' },
+    xaxis: { tickangle: -45, color: '#a0aec0' },
+    yaxis: { title: 'Market Value', color: '#a0aec0', gridcolor: 'rgba(255,255,255,0.1)' }
+  };
+  
+  Plotly.newPlot('bar', [trace], layout, { responsive: true });
+  
+  document.getElementById('barInterp').innerText = 
+    `Top 10 pemain berdasarkan market value menunjukkan gap yang signifikan. Pemain teratas memiliki nilai ${(items[0].val/1e6).toFixed(1)}M, sementara posisi ke-10 berada di ${(items[9].val/1e6).toFixed(1)}M.`;
+}
+
+function renderScatter(filtered) {
+  const x = xSel.value, y = ySel.value;
+  const area = document.getElementById('scatter');
+  const interp = document.getElementById('scatterInterp');
+  
+  if (x === y) {
+    sameVarDisclaimer.style.display = 'block';
+    sameVarDisclaimer.innerText = `⚠️ Variabel X dan Y sama (${x}). Scatter plot akan menampilkan garis diagonal.`;
+  } else {
+    sameVarDisclaimer.style.display = 'none';
+  }
+  
+  if (!(NUMERIC_COLS.includes(x) && NUMERIC_COLS.includes(y))) {
+    area.innerHTML = '<div style="padding:40px;text-align:center;color:var(--text-secondary);">Kedua variabel harus numerik untuk scatter plot</div>';
+    interp.innerText = '';
+    return;
+  }
+  
+  const groups = {};
+  filtered.forEach(r => {
+    const league = COL_LEAGUE ? (r[COL_LEAGUE] || 'Unknown') : 'Unknown';
+    const xv = safeNum(r[x]);
+    const yv = safeNum(r[y]);
+    
+    if (xv !== null && yv !== null) {
+      if (!groups[league]) groups[league] = [];
+      groups[league].push({ x: xv, y: yv, text: r[COL_PLAYER] || '' });
+    }
+  });
+  
+  const traces = [];
+  const colors = ['#00ff88', '#00d4ff', '#b400ff', '#ff6b00', '#ff0080', '#ffcc00'];
+  
+  Object.entries(groups).forEach(([league, points], idx) => {
+    traces.push({
+      x: points.map(p => p.x),
+      y: points.map(p => p.y),
+      mode: 'markers',
+      type: 'scatter',
+      name: league,
+      text: points.map(p => p.text),
+      marker: {
+        size: 10,
+        color: colors[idx % colors.length],
+        line: { color: '#0a0e1a', width: 1 }
+      }
+    });
+  });
+  
+  const layout = {
+    height: 450,
+    paper_bgcolor: 'rgba(0,0,0,0)',
+    plot_bgcolor: 'rgba(0,0,0,0)',
+    font: { color: '#ffffff', family: 'DM Sans' },
+    xaxis: { title: x, color: '#a0aec0', gridcolor: 'rgba(255,255,255,0.1)' },
+    yaxis: { title: y, color: '#a0aec0', gridcolor: 'rgba(255,255,255,0.1)' },
+    showlegend: true,
+    legend: { orientation: 'h', y: -0.15 }
+  };
+  
+  Plotly.newPlot('scatter', traces, layout, { responsive: true });
+  
+  // Calculate correlation
+  const xs = [], ys = [];
+  filtered.forEach(r => {
+    const xv = safeNum(r[x]);
+    const yv = safeNum(r[y]);
+    if (xv !== null && yv !== null) {
+      xs.push(xv);
+      ys.push(yv);
+    }
+  });
+  
+  if (xs.length > 1) {
+    const corr = pearson(xs, ys);
+    let strength = '';
+    if (Math.abs(corr) >= 0.7) strength = 'kuat';
+    else if (Math.abs(corr) >= 0.3) strength = 'sedang';
+    else strength = 'lemah';
+    
+    interp.innerText = `Korelasi Pearson antara ${x} dan ${y} adalah ${corr.toFixed(2)} (hubungan ${strength}). ${
+      corr > 0 ? 'Korelasi positif menunjukkan bahwa kenaikan pada satu variabel cenderung diikuti kenaikan pada variabel lainnya.' :
+      corr < 0 ? 'Korelasi negatif menunjukkan hubungan terbalik antara kedua variabel.' :
+      'Tidak ada hubungan linear yang signifikan.'
+    }`;
+  } else {
+    interp.innerText = 'Tidak cukup data untuk menghitung korelasi.';
+  }
+}
+
+function renderBox(filtered) {
+  const y = ySel.value;
+  const area = document.getElementById('box');
+  const interp = document.getElementById('boxInterp');
+  
+  if (!NUMERIC_COLS.includes(y)) {
+    area.innerHTML = '<div style="padding:40px;text-align:center;color:var(--text-secondary);">Variabel Y harus numerik untuk box plot</div>';
+    interp.innerText = '';
+    return;
+  }
+  
+  const values = filtered.map(r => safeNum(r[y])).filter(v => v !== null);
+  
+  if (values.length === 0) {
+    area.innerHTML = '<div style="padding:40px;text-align:center;color:var(--text-secondary);">Tidak ada data numerik tersedia</div>';
+    interp.innerText = '';
+    return;
+  }
+  
+  const trace = {
+    y: values,
+    type: 'box',
+    boxpoints: 'outliers',
+    marker: { color: '#00ff88', line: { color: '#0a0e1a', width: 2 } },
+    name: y
+  };
+  
+  const layout = {
+    height: 450,
+    paper_bgcolor: 'rgba(0,0,0,0)',
+    plot_bgcolor: 'rgba(0,0,0,0)',
+    font: { color: '#ffffff', family: 'DM Sans' },
+    yaxis: { title: y, color: '#a0aec0', gridcolor: 'rgba(255,255,255,0.1)' }
+  };
+  
+  Plotly.newPlot('box', [trace], layout, { responsive: true });
+  
+  const q1 = quantile(values, 0.25);
+  const q3 = quantile(values, 0.75);
+  const median = quantile(values, 0.5);
+  const iqr = q3 - q1;
+  
+  interp.innerText = `Distribusi ${y} memiliki median ${median.toFixed(2)} dengan IQR (Q1-Q3) dari ${q1.toFixed(2)} hingga ${q3.toFixed(2)}. Rentang interkuartil ${iqr.toFixed(2)} menunjukkan variabilitas data, dan outlier (jika ada) terlihat sebagai titik di luar whisker.`;
+}
+
+function renderHeat(filtered) {
+  const area = document.getElementById('heat');
+  
+  if (NUMERIC_COLS.length === 0) {
+    area.innerHTML = '<div style="padding:40px;text-align:center;color:var(--text-secondary);">Tidak ada kolom numerik untuk heatmap</div>';
+    return;
+  }
+  
+  const cols = NUMERIC_COLS.slice();
+  const n = cols.length;
+  const z = Array.from({ length: n }, () => Array(n).fill(0));
+  
+  for (let i = 0; i < n; i++) {
+    for (let j = 0; j < n; j++) {
+      const pairedX = [], pairedY = [];
+      
+      filtered.forEach(r => {
+        const a = safeNum(r[cols[i]]);
+        const b = safeNum(r[cols[j]]);
+        if (a !== null && b !== null) {
+          pairedX.push(a);
+          pairedY.push(b);
+        }
+      });
+      
+      z[i][j] = pairedX.length > 1 ? pearson(pairedX, pairedY) : 0;
+    }
+  }
+  
+  const annotations = [];
+  for (let i = 0; i < n; i++) {
+    for (let j = 0; j < n; j++) {
+      annotations.push({
+        x: cols[j],
+        y: cols[i],
+        text: z[i][j].toFixed(2),
+        showarrow: false,
+        font: {
+          color: Math.abs(z[i][j]) > 0.5 ? '#ffffff' : '#a0aec0',
+          size: 12
+        }
+      });
+    }
+  }
+  
+  const data = [{
+    z: z,
+    x: cols,
+    y: cols,
+    type: 'heatmap',
+    colorscale: [
+      [0, '#b400ff'],
+      [0.5, '#0a0e1a'],
+      [1, '#00ff88']
+    ],
+    zmin: -1,
+    zmax: 1,
+    showscale: true,
+    colorbar: {
+      tickfont: { color: '#ffffff' },
+      title: { text: 'Correlation', font: { color: '#ffffff' } }
+    }
+  }];
+  
+  const layout = {
+    height: 550,
+    paper_bgcolor: 'rgba(0,0,0,0)',
+    plot_bgcolor: 'rgba(0,0,0,0)',
+    font: { color: '#ffffff', family: 'DM Sans' },
+    annotations: annotations,
+    xaxis: { tickangle: -45, color: '#a0aec0' },
+    yaxis: { color: '#a0aec0' },
+    margin: { l: 140, r: 40, t: 40, b: 140 }
+  };
+  
+  Plotly.newPlot('heat', data, layout, { responsive: true });
+  
+  document.getElementById('heatInterp').innerText = 
+    'Heatmap korelasi menampilkan hubungan antar semua variabel numerik. Warna hijau menunjukkan korelasi positif kuat, ungu menunjukkan korelasi negatif kuat, dan hitam menunjukkan tidak ada korelasi. Gunakan ini untuk mengidentifikasi variabel yang saling terkait.';
+}
+
+function renderAnalysis(filtered) {
+  const x = xSel.value, y = ySel.value;
+  const el = document.getElementById('analysisText');
+  
+  let text = '';
+  
+  if (x === y) {
+    text = `⚠️ Anda memilih variabel yang sama (${x}) untuk sumbu X dan Y. Ini akan menghasilkan garis diagonal sempurna pada scatter plot karena setiap titik memiliki nilai yang identik untuk kedua sumbu. Untuk analisis yang bermakna, pilih dua variabel berbeda.`;
+  } else if (NUMERIC_COLS.includes(x) && NUMERIC_COLS.includes(y)) {
+    const xs = [], ys = [];
+    
+    filtered.forEach(r => {
+      const a = safeNum(r[x]);
+      const b = safeNum(r[y]);
+      if (a !== null && b !== null) {
+        xs.push(a);
+        ys.push(b);
+      }
+    });
+    
+    if (xs.length > 1) {
+      const corr = pearson(xs, ys);
+      const direction = corr > 0.1 ? 'positif' : corr < -0.1 ? 'negatif' : 'netral';
+      const strength = Math.abs(corr) >= 0.7 ? 'sangat kuat' : 
+                      Math.abs(corr) >= 0.5 ? 'kuat' :
+                      Math.abs(corr) >= 0.3 ? 'sedang' : 'lemah';
+      
+      text = `📊 Analisis korelasi menunjukkan hubungan ${direction} ${strength} antara ${x} dan ${y} dengan koefisien Pearson ${corr.toFixed(3)}.\n\n`;
+      
+      if (Math.abs(corr) >= 0.5) {
+        text += `Korelasi ini cukup kuat untuk mengindikasikan bahwa perubahan pada ${x} ${corr > 0 ? 'cenderung diikuti oleh kenaikan' : 'cenderung diikuti oleh penurunan'} pada ${y}. Ini bisa menjadi insight penting untuk strategi analisis lebih lanjut atau pengambilan keputusan.`;
+      } else if (Math.abs(corr) >= 0.3) {
+        text += `Meskipun ada kecenderungan hubungan, variabilitas data menunjukkan bahwa faktor lain juga berpengaruh. Pertimbangkan untuk menganalisis variabel tambahan yang mungkin mempengaruhi hubungan ini.`;
+      } else {
+        text += `Hubungan yang lemah menunjukkan bahwa ${x} dan ${y} relatif independen satu sama lain. Ini bisa berarti bahwa faktor-faktor lain lebih dominan dalam mempengaruhi masing-masing variabel.`;
+      }
+    } else {
+      text = 'Tidak cukup data numerik yang valid untuk melakukan analisis korelasi yang bermakna. Coba filter yang berbeda atau periksa kualitas data.';
+    }
+  } else {
+    text = `Variabel ${x} dan/atau ${y} bukan tipe numerik, sehingga analisis korelasi numerik tidak dapat dilakukan. Untuk variabel kategorikal, pertimbangkan menggunakan visualisasi distribusi atau cross-tabulation untuk memahami hubungannya.`;
+  }
+  
   el.innerText = text;
 }
 
-function quantile(arr,q){
-  const s = arr.slice().sort((a,b)=>a-b); const pos = (s.length-1)*q; const base = Math.floor(pos); const rest = pos-base;
-  if(s[base+1]!==undefined) return s[base] + rest*(s[base+1]-s[base]);
-  return s[base];
+function populateControls() {
+  // Populate league selector
+  leagueSel.innerHTML = '<option>Semua Liga</option>';
+  LEAGUES.forEach(league => {
+    const option = document.createElement('option');
+    option.value = option.text = league;
+    leagueSel.appendChild(option);
+  });
+  
+  // Populate X and Y selectors
+  xSel.innerHTML = '';
+  ySel.innerHTML = '';
+  
+  ALL_COLS.forEach(col => {
+    const optX = document.createElement('option');
+    optX.value = optX.text = col;
+    xSel.appendChild(optX);
+    
+    const optY = document.createElement('option');
+    optY.value = optY.text = col;
+    ySel.appendChild(optY);
+  });
+  
+  // Set defaults
+  if (ALL_COLS.includes(COL_MARKET)) xSel.value = COL_MARKET;
+  if (ALL_COLS.includes(COL_GOALS)) ySel.value = COL_GOALS;
 }
 
-function renderAll(){
+function renderAll() {
   const filtered = getFiltered();
   renderExec(filtered);
   renderKPI(filtered);
@@ -282,19 +1193,19 @@ function renderAll(){
   renderAnalysis(filtered);
 }
 
+// Event listeners
 applyBtn.addEventListener('click', renderAll);
 leagueSel.addEventListener('change', renderAll);
 xSel.addEventListener('change', renderAll);
 ySel.addEventListener('change', renderAll);
-resetBtn.addEventListener('click', ()=>{ populateControls(); renderAll(); });
+resetBtn.addEventListener('click', () => {
+  populateControls();
+  renderAll();
+});
 
-function populateControls(){ leagueSel.innerHTML="<option>Semua Liga</option>"; LEAGUES.forEach(l=>{ const o=document.createElement('option'); o.value=o.text=l; leagueSel.appendChild(o); });
-  xSel.innerHTML=""; ySel.innerHTML=""; ALL_COLS.forEach(c=>{ const ox=document.createElement('option'); ox.value=ox.text=c; xSel.appendChild(ox); const oy=document.createElement('option'); oy.value=oy.text=c; ySel.appendChild(oy); });
-  if(ALL_COLS.includes(COL_MARKET)) xSel.value = COL_MARKET;
-  if(ALL_COLS.includes(COL_GOALS)) ySel.value = COL_GOALS;
-}
-populateControls();
-renderAll();
+// Initialize on load
+init();
 </script>
+
 </body>
 </html>
